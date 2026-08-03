@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Branch;
+use App\Models\BusinessType;
 use App\Models\Category;
 use App\Models\PaymentMethod;
 use App\Models\Product;
@@ -14,6 +16,17 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(RoleSeeder::class);
+
+        $businessType = BusinessType::firstOrCreate(
+            ['slug' => 'kedai-kopi'],
+            ['name' => 'Kedai Kopi', 'description' => 'Kopi, minuman, dan makanan ringan', 'is_active' => true]
+        );
+
+        $branch = Branch::firstOrCreate(
+            ['slug' => 'cabang-utama'],
+            ['name' => 'Cabang Utama', 'is_active' => true, 'is_online' => true]
+        );
+        $branch->businessTypes()->syncWithoutDetaching([$businessType->id]);
 
         $roles = Role::all()->keyBy('name');
 

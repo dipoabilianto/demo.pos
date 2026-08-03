@@ -36,3 +36,4 @@ GEMINI.md
 .backup.*/
 storage/backup_raw_materials_20260713_091600.json
 AUDIT.md
+.env.lerd_override
