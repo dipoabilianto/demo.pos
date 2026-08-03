@@ -15,8 +15,10 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
-use Xendit\Invoice;
-use Xendit\Xendit;
+use Xendit\Configuration;
+use Xendit\Invoice\CreateInvoiceRequest;
+use Xendit\Invoice\CustomerObject;
+use Xendit\Invoice\InvoiceApi;
 
 class PaymentController extends Controller
 {
@@ -29,15 +31,17 @@ class PaymentController extends Controller
     public function __construct(
         private SettingService $settingService,
         private PaymentService $paymentService,
-    ) {
+    ) {}
+
+    private function getXenditSecretKey(): ?string
+    {
         $secretKey = config('services.xendit.secret_key');
         if (! $secretKey) {
             $settings = $this->settingService->getSettings();
             $secretKey = $settings['xendit_secret_key'] ?? '';
         }
-        if ($secretKey) {
-            Xendit::setApiKey($secretKey);
-        }
+
+        return $secretKey ?: null;
     }
 
     public function checkout(Sale $sale): View
@@ -59,24 +63,32 @@ class PaymentController extends Controller
             'payment_method' => 'required|string|in:'.$activeCodes,
         ]);
 
+        $secretKey = $this->getXenditSecretKey();
+        if (! $secretKey) {
+            return response()->json(['error' => 'Xendit API key belum dikonfigurasi.'], 500);
+        }
+
         try {
+            Configuration::setXenditKey($secretKey);
+
             $externalId = 'SALE-'.$sale->id.'-'.time();
 
-            $params = [
-                'external_id' => $externalId,
-                'amount' => (float) $sale->total,
-                'description' => 'Pembayaran Invoice '.$sale->invoice_number,
-                'invoice_duration' => 86400,
-                'customer' => [
-                    'given_names' => 'Customer',
-                    'surname' => 'Oribun',
-                    'email' => 'customer@oribun.app',
-                ],
-                'payment_methods' => [$request->payment_method],
-                'currency' => 'IDR',
-            ];
+            $customerObj = new CustomerObject;
+            $customerObj->setGivenNames('Customer');
+            $customerObj->setSurname('Oribun');
+            $customerObj->setEmail('customer@oribun.app');
 
-            $invoice = Invoice::create($params);
+            $createRequest = new CreateInvoiceRequest;
+            $createRequest->setExternalId($externalId);
+            $createRequest->setAmount((float) $sale->total);
+            $createRequest->setDescription('Pembayaran Invoice '.$sale->invoice_number);
+            $createRequest->setInvoiceDuration(86400);
+            $createRequest->setCustomer($customerObj);
+            $createRequest->setPaymentMethods([$request->payment_method]);
+            $createRequest->setCurrency('IDR');
+
+            $apiInstance = new InvoiceApi;
+            $invoice = $apiInstance->createInvoice($createRequest);
 
             Transaction::create([
                 'xendit_id' => $invoice['id'],
@@ -224,7 +236,14 @@ class PaymentController extends Controller
     public function status(Transaction $transaction): JsonResponse
     {
         try {
-            $xenditInvoice = Invoice::retrieve($transaction->xendit_id);
+            $secretKey = $this->getXenditSecretKey();
+            if (! $secretKey) {
+                return response()->json(['error' => 'Xendit API key belum dikonfigurasi.'], 500);
+            }
+
+            Configuration::setXenditKey($secretKey);
+            $apiInstance = new InvoiceApi;
+            $xenditInvoice = $apiInstance->getInvoiceById($transaction->xendit_id);
 
             return response()->json($xenditInvoice);
         } catch (\Exception $e) {
