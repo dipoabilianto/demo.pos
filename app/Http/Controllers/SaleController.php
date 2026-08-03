@@ -112,6 +112,7 @@ class SaleController extends Controller
                 'payment_method' => $validated['payment_method'],
                 'payment_status' => $paidAmount >= $total ? 'paid' : 'partial',
                 'notes' => $validated['notes'] ?? null,
+                'branch_id' => session('branch_id'),
             ]);
 
             foreach ($saleItems as $item) {

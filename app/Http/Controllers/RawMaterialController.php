@@ -48,6 +48,7 @@ class RawMaterialController extends Controller
             'current_stock' => 'required|numeric|min:0',
             'min_stock' => 'required|numeric|min:0',
         ]);
+        $validated['branch_id'] = session('branch_id');
 
         RawMaterial::create($validated);
 

@@ -74,6 +74,16 @@
             </div>
         </div>
 
+        <div>
+            <label class="block text-sm font-medium text-warm-700 mb-1.5">Berlaku Untuk Cabang</label>
+            <select name="branch_id" class="block w-full rounded-xl border-warm-200 px-4 py-2.5 shadow-sm focus:border-theme-primary focus:ring-theme-primary/20 text-sm bg-white">
+                <option value="">Semua Cabang</option>
+                @foreach ($branches as $branch)
+                    <option value="{{ $branch->id }}" {{ (string) old('branch_id') === (string) $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
         <div class="flex items-center gap-3">
             <input type="checkbox" name="is_active" id="is_active" value="1" {{ old('is_active', '1') === '1' ? 'checked' : '' }} class="h-4 w-4 rounded border-warm-300 text-theme-primary focus:ring-theme-primary/50">
             <label for="is_active" class="text-sm font-medium text-warm-700">Aktif</label>

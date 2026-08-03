@@ -88,6 +88,7 @@ class PaymentController extends Controller
                 'amount' => $sale->total,
                 'external_id' => $externalId,
                 'xendit_response' => $invoice,
+                'branch_id' => $sale->branch_id ?? session('branch_id'),
             ]);
 
             $sale->update(['payment_method' => $request->payment_method]);

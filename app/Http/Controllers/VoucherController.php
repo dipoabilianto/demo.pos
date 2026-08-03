@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
 use App\Models\Voucher;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -35,7 +36,9 @@ class VoucherController extends Controller
 
     public function create(): View
     {
-        return view('vouchers.create');
+        $branches = Branch::active()->get();
+
+        return view('vouchers.create', compact('branches'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -51,6 +54,7 @@ class VoucherController extends Controller
             'starts_at' => 'nullable|date',
             'expires_at' => 'nullable|date|after_or_equal:starts_at',
             'is_active' => 'boolean',
+            'branch_id' => 'nullable|integer|exists:branches,id',
         ]);
 
         $validated['min_order'] = $validated['min_order'] ?? 0;
@@ -66,7 +70,9 @@ class VoucherController extends Controller
 
     public function edit(Voucher $voucher): View
     {
-        return view('vouchers.edit', compact('voucher'));
+        $branches = Branch::active()->get();
+
+        return view('vouchers.edit', compact('voucher', 'branches'));
     }
 
     public function update(Request $request, Voucher $voucher): RedirectResponse
@@ -82,6 +88,7 @@ class VoucherController extends Controller
             'starts_at' => 'nullable|date',
             'expires_at' => 'nullable|date|after_or_equal:starts_at',
             'is_active' => 'boolean',
+            'branch_id' => 'nullable|integer|exists:branches,id',
         ]);
 
         $validated['min_order'] = $validated['min_order'] ?? 0;

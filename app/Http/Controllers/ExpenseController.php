@@ -57,12 +57,13 @@ class ExpenseController extends Controller
             'amount' => $validated['amount'],
             'category' => $validated['category'],
             'expense_date' => $validated['expense_date'],
+            'branch_id' => session('branch_id'),
         ]);
 
         if ($request->category === 'Stok Bahan Baku' && $request->raw_material_name && $request->stock_quantity > 0) {
             $material = RawMaterial::firstOrCreate(
                 ['name' => trim($request->raw_material_name)],
-                ['unit' => $request->raw_material_unit, 'current_stock' => 0, 'min_stock' => 0],
+                ['unit' => $request->raw_material_unit, 'current_stock' => 0, 'min_stock' => 0, 'branch_id' => session('branch_id')],
             );
 
             StockTransaction::create([
@@ -73,6 +74,7 @@ class ExpenseController extends Controller
                 'note' => 'Pembelian: ' . $request->title,
                 'user_id' => auth()->id(),
                 'expense_id' => $expense->id,
+                'branch_id' => session('branch_id'),
             ]);
             $material->increment('current_stock', $request->stock_quantity);
         }

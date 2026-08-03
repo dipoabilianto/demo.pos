@@ -154,6 +154,7 @@ class OrderController extends Controller
                 'tax' => $tax,
                 'total' => $total,
                 'notes' => $validated['notes'] ?? null,
+                'branch_id' => session('branch_id'),
             ]);
 
             $this->createOrderItems($order, $orderItems);
@@ -190,10 +191,13 @@ class OrderController extends Controller
             'customer_email' => 'nullable|email|max:255',
             'notes' => 'nullable|string',
             'voucher_code' => 'nullable|string|max:50',
+            'branch_id' => 'nullable|integer|exists:branches,id',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
         ]);
+
+        $branchId = $validated['branch_id'] ?? session('branch_id') ?? Branch::active()->online()->first()?->id;
 
         try {
             DB::beginTransaction();
@@ -228,7 +232,11 @@ class OrderController extends Controller
             $voucher = null;
 
             if ($voucherCode = $validated['voucher_code'] ?? null) {
-                $voucher = Voucher::where('code', $voucherCode)->lockForUpdate()->first();
+                $voucher = Voucher::where('code', $voucherCode)
+                    ->where(function ($q) use ($branchId) {
+                        $q->where('branch_id', $branchId)->orWhereNull('branch_id');
+                    })
+                    ->lockForUpdate()->first();
 
                 if (! $voucher) {
                     return response()->json(['error' => 'Kode voucher tidak valid.'], 422);
@@ -260,6 +268,7 @@ class OrderController extends Controller
                 'notes' => $validated['notes'] ?? null,
                 'voucher_id' => $voucherId,
                 'voucher_code' => $voucher->code ?? null,
+                'branch_id' => $branchId,
             ]);
 
             $this->createOrderItems($order, $orderItems);
@@ -629,6 +638,7 @@ class OrderController extends Controller
                     'subtotal' => $subtotal,
                     'total' => $subtotal,
                     'notes' => $validated['notes'] ?? null,
+                    'branch_id' => session('branch_id'),
                 ]);
             }
 
