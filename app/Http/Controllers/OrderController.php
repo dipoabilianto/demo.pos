@@ -81,7 +81,7 @@ class OrderController extends Controller
 
         $products = $this->orderService->getPublicCatalogProducts($branch);
 
-        $settings = $this->settingService->getSettings();
+        $settings = $this->settingService->getSettings($branch?->id);
         $previewOrderNumber = Order::previewOrderNumber('ORDON');
         $isOnline = $branch->is_online ?? false;
 
@@ -363,7 +363,7 @@ class OrderController extends Controller
         $cashMethod = PaymentMethod::where('code', 'cash')->first();
         $transferMethod = PaymentMethod::where('code', 'transfer')->first();
         $paymentMethods = PaymentMethod::active()->whereNotIn('code', ['cash', 'transfer', 'qris_manual'])->get();
-        $settings = $this->settingService->getSettings();
+        $settings = $this->settingService->getSettings($order->branch_id);
 
         return view('orders.public-payment', compact('order', 'paymentMethods', 'settings', 'cashMethod', 'transferMethod'));
     }
@@ -604,7 +604,7 @@ class OrderController extends Controller
     public function publicReceipt(Order $order): View
     {
         $order->load('items', 'voucher', 'transaction');
-        $settings = $this->settingService->getSettings();
+        $settings = $this->settingService->getSettings($order->branch_id);
 
         return view('receipts.consumer', compact('order', 'settings'));
     }

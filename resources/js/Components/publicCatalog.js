@@ -246,7 +246,7 @@ function initCheckoutModal() {
     const chkModal = document.getElementById('checkout-modal');
     const chkOverlay = document.getElementById('checkout-overlay');
 
-    function renderCheckoutItems() {
+    async function renderCheckoutItems() {
         const cart = getCart();
         const ids = Object.keys(cart);
         const itemsEl = document.getElementById('checkout-items');
@@ -255,8 +255,33 @@ function initCheckoutModal() {
         const subtotalEl = document.getElementById('checkout-subtotal');
         const totalEl = document.getElementById('checkout-total');
 
-        if (ids.length === 0 || checkoutProducts.length === 0) {
+        if (ids.length === 0) {
             itemsEl.classList.add('hidden');
+            emptyEl.textContent = 'Keranjang kosong';
+            emptyEl.classList.remove('hidden');
+            subtotalEl.textContent = fmt(0);
+            totalEl.textContent = fmt(0);
+            countEl.textContent = '';
+            return;
+        }
+
+        // checkoutProducts is populated by the cart sidebar's own async
+        // fetch, which may not have resolved (or run at all) by the time
+        // checkout opens — always refetch here so this modal reflects the
+        // current cart instead of a stale or empty product list.
+        try {
+            const res = await fetch(config.batchUrl + '?ids=' + ids.join(','), { headers: { 'Accept': 'application/json' } });
+            checkoutProducts = await res.json();
+        } catch (e) {
+            itemsEl.classList.add('hidden');
+            emptyEl.textContent = 'Gagal memuat keranjang';
+            emptyEl.classList.remove('hidden');
+            return;
+        }
+
+        if (checkoutProducts.length === 0) {
+            itemsEl.classList.add('hidden');
+            emptyEl.textContent = 'Keranjang kosong';
             emptyEl.classList.remove('hidden');
             subtotalEl.textContent = fmt(0);
             totalEl.textContent = fmt(0);
