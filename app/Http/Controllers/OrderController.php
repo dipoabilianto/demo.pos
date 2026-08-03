@@ -324,7 +324,13 @@ class OrderController extends Controller
             'code' => 'required|string|max:50',
             'subtotal' => 'required|numeric|min:0',
             'branch_id' => 'nullable|integer|exists:branches,id',
+            'customer_phone' => 'nullable|string|max:20',
+            'customer_email' => 'nullable|email|max:255',
         ]);
+
+        // Same fallback chain publicStore() uses at actual submit time, so this preview
+        // reflects whether the voucher will really be accepted for this customer.
+        $customerIdentifier = $validated['customer_email'] ?? $validated['customer_phone'] ?? $request->ip();
 
         $branchId = $validated['branch_id'] ?? session('branch_id');
         if (! $branchId) {
@@ -332,10 +338,10 @@ class OrderController extends Controller
         }
 
         if ($branchId) {
-            $result = $this->paymentService->checkVoucherAvailability($validated['code'], $branchId, $validated['subtotal']);
+            $result = $this->paymentService->checkVoucherAvailability($validated['code'], $branchId, $validated['subtotal'], $customerIdentifier);
         } else {
             $voucher = Voucher::where('code', $validated['code'])->first();
-            $result = $voucher && $voucher->isValidFor($validated['subtotal'])
+            $result = $voucher && $voucher->isValidFor($validated['subtotal'], $customerIdentifier)
                 ? ['valid' => true, 'discount' => $voucher->calculateDiscount($validated['subtotal']), 'type' => $voucher->type]
                 : ['valid' => false];
         }

@@ -363,7 +363,7 @@ function initCheckoutModal() {
         if (voucherCode) {
             const subtotal = parseInt((document.getElementById('checkout-subtotal').textContent || '0').replace(/[^0-9]/g, '')) || 0;
             try {
-                const checkResp = await fetch(config.checkVoucherUrl + '?code=' + encodeURIComponent(voucherCode) + '&subtotal=' + subtotal + '&branch_id=' + config.branchId, {
+                const checkResp = await fetch(config.checkVoucherUrl + '?code=' + encodeURIComponent(voucherCode) + '&subtotal=' + subtotal + '&branch_id=' + config.branchId + '&customer_phone=' + encodeURIComponent(phone), {
                     headers: { 'Accept': 'application/json' },
                 });
                 const checkData = await checkResp.json();
@@ -444,7 +444,8 @@ function initVoucherCheck() {
             const subtotal = parseInt(raw) || 0;
             if (subtotal === 0) return;
             try {
-                const resp = await fetch(config.checkVoucherUrl + '?code=' + encodeURIComponent(code) + '&subtotal=' + subtotal + '&branch_id=' + config.branchId, {
+                const phone = document.getElementById('checkout-phone').value.trim();
+                const resp = await fetch(config.checkVoucherUrl + '?code=' + encodeURIComponent(code) + '&subtotal=' + subtotal + '&branch_id=' + config.branchId + (phone ? '&customer_phone=' + encodeURIComponent(phone) : ''), {
                     headers: { 'Accept': 'application/json' },
                 });
                 const data = await resp.json();

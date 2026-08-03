@@ -150,6 +150,47 @@ class VoucherTest extends TestCase
     }
 
     #[Test]
+    public function voucher_already_used_by_this_customer_is_not_valid_for_them_again()
+    {
+        $voucher = Voucher::factory()->create(['max_uses_per_user' => 1]);
+        $order = \App\Models\Order::factory()->create();
+        \App\Models\VoucherUsage::create([
+            'voucher_id' => $voucher->id,
+            'order_id' => $order->id,
+            'customer_identifier' => '0812xxxxxxx',
+        ]);
+
+        expect($voucher->isValidFor(50000, '0812xxxxxxx'))->toBeFalse();
+        expect($voucher->isValidFor(50000, '0899yyyyyyy'))->toBeTrue();
+    }
+
+    #[Test]
+    public function public_voucher_preview_reflects_per_customer_usage_limit()
+    {
+        // Regression: the live preview at /orders/public/check-voucher called
+        // isValidFor() without a customer identifier, so the max_uses_per_user check
+        // was silently skipped — the preview always said "valid" even for a customer
+        // who had already used up their allowance, only to be rejected moments later
+        // at actual order submission with a different error, confusing the customer.
+        $branch = \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => true]);
+        $voucher = Voucher::factory()->create(['branch_id' => null, 'max_uses_per_user' => 1]);
+        $order = \App\Models\Order::factory()->create();
+        \App\Models\VoucherUsage::create([
+            'voucher_id' => $voucher->id,
+            'order_id' => $order->id,
+            'customer_identifier' => '081200000000',
+        ]);
+
+        $reused = $this->getJson('/orders/public/check-voucher?code='.$voucher->code.'&subtotal=50000&branch_id='.$branch->id.'&customer_phone=081200000000');
+        $reused->assertStatus(422);
+        $reused->assertJson(['valid' => false]);
+
+        $fresh = $this->getJson('/orders/public/check-voucher?code='.$voucher->code.'&subtotal=50000&branch_id='.$branch->id.'&customer_phone=089900000000');
+        $fresh->assertStatus(200);
+        $fresh->assertJson(['valid' => true]);
+    }
+
+    #[Test]
     public function percentage_discount_calculation()
     {
         $voucher = Voucher::factory()->percentage(10, 5000)->create();

@@ -69,7 +69,7 @@ class PaymentService
         return $sale;
     }
 
-    public function checkVoucherAvailability(string $code, int $branchId, float $subtotal): array
+    public function checkVoucherAvailability(string $code, int $branchId, float $subtotal, ?string $customerIdentifier = null): array
     {
         // withoutGlobalScopes(): $branchId is the branch being browsed (from the URL),
         // not necessarily session('branch_id') — a logged-in admin checking a voucher
@@ -83,7 +83,11 @@ class PaymentService
             })
             ->first();
 
-        if (! $voucher || ! $voucher->isValidFor($subtotal)) {
+        // $customerIdentifier must be passed through so the per-customer usage limit is
+        // actually checked here — without it, this preview always reported "valid" even
+        // for a customer who had already used up their allowance, only to be rejected by
+        // the real check (with the identifier) at order submission a moment later.
+        if (! $voucher || ! $voucher->isValidFor($subtotal, $customerIdentifier)) {
             return ['valid' => false];
         }
 
