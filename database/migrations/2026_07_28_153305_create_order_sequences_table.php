@@ -20,14 +20,16 @@ return new class extends Migration
         foreach ($prefixes as $prefix) {
             $rows = DB::table('orders')
                 ->where('order_number', 'like', $prefix . '-%')
-                ->selectRaw("SUBSTRING_INDEX(order_number, '-', -2) AS date_seq")
-                ->get();
+                ->get(['order_number']);
 
             $maxByDate = [];
             foreach ($rows as $row) {
-                $parts = explode('-', $row->date_seq);
-                $datePrefix = $parts[0];
-                $seq = (int) $parts[1];
+                $parts = explode('-', $row->order_number);
+                if (count($parts) < 3) {
+                    continue;
+                }
+                $datePrefix = $parts[1];
+                $seq = (int) $parts[2];
                 $key = $prefix . '-' . $datePrefix;
                 if (!isset($maxByDate[$key]) || $seq > $maxByDate[$key]) {
                     $maxByDate[$key] = $seq;

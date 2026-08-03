@@ -69,13 +69,7 @@ class OrderController extends Controller
 
     public function publicCatalog(Request $request): View
     {
-        $firstKey = collect($request->query())->keys()->first();
-        $firstVal = $request->query($firstKey);
-        $branchId = $request->query('branch_id')
-            ?? $request->query('branch')
-            ?? (is_numeric($firstKey) && ($firstVal === '' || $firstVal === null) ? $firstKey : null)
-            ?? (is_numeric($firstVal) ? $firstVal : null)
-            ?? session('branch_id');
+        $branchId = $request->query('branch_id') ?? $request->query('branch') ?? session('branch_id');
         $branch = $branchId ? Branch::find($branchId) : null;
         $branch = $branch?->is_online ? $branch : Branch::active()->online()->first();
 

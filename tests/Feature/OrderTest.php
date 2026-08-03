@@ -177,9 +177,50 @@ test('public catalog shows online branch', function () {
         'is_active' => true,
     ]);
 
-    $response = $this->get(route('orders.public-catalog', $branch));
+    $response = $this->get(route('orders.public-catalog', ['branch_id' => $branch->id]));
 
     $response->assertStatus(200);
+});
+
+test('public catalog resolves the requested branch, not just any online branch', function () {
+    $branchA = \App\Models\Branch::factory()->create(['is_online' => true, 'is_active' => true]);
+    $branchB = \App\Models\Branch::factory()->create(['is_online' => true, 'is_active' => true]);
+
+    $response = $this->get(route('orders.public-catalog', ['branch_id' => $branchB->id]));
+
+    $response->assertStatus(200);
+    $response->assertViewHas('branch', fn ($branch) => $branch->id === $branchB->id);
+});
+
+test('public catalog degrades gracefully on a malformed key-less branch query', function () {
+    // route('orders.public-catalog', $branch) with no {branch} URI segment produces a
+    // key-less query string like ?6 instead of ?branch_id=6 — this is what
+    // resources/views/components/layout/topbar.blade.php generated before it was fixed
+    // to pass ['branch_id' => $branch->id] explicitly. The controller no longer tries to
+    // guess a branch out of an arbitrary query key; it must fall back to the default
+    // online branch instead of crashing or resolving an unrelated branch by accident.
+    $branch = \App\Models\Branch::factory()->create(['is_online' => true, 'is_active' => true]);
+
+    $malformedUrl = route('orders.public-catalog', $branch);
+    expect($malformedUrl)->toContain('?'.$branch->id);
+
+    $response = $this->get($malformedUrl);
+    $response->assertStatus(200);
+    $response->assertViewHas('branch', fn ($resolved) => $resolved->is_online && $resolved->is_active);
+});
+
+test('public product batch API does not leak another branch products when branch_id is given', function () {
+    $branchA = \App\Models\Branch::factory()->create(['is_online' => true, 'is_active' => true]);
+    $branchB = \App\Models\Branch::factory()->create(['is_online' => true, 'is_active' => true]);
+    $productA = Product::factory()->create(['branch_id' => $branchA->id, 'is_active' => true]);
+    $productB = Product::factory()->create(['branch_id' => $branchB->id, 'is_active' => true]);
+
+    $response = $this->getJson('/api/products/batch?ids='.$productA->id.','.$productB->id.'&branch_id='.$branchA->id);
+
+    $response->assertStatus(200);
+    $ids = collect($response->json())->pluck('id');
+    expect($ids)->toContain($productA->id);
+    expect($ids)->not->toContain($productB->id);
 });
 
 test('check voucher validates required fields', function () {
