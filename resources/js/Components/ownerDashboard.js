@@ -38,11 +38,10 @@ export function profitBranchChart(config) {
         _chart: null,
         init() {
             const allProfitValues = config.profitBranches.flatMap(b => b.data);
-            const dataMax = Math.max(...allProfitValues, 1);
-            const positiveValues = allProfitValues.filter(v => v > 0);
-            const dataMin = positiveValues.length > 0 ? Math.min(...positiveValues) : 0;
-            const yMax = Math.ceil(dataMax * 1.2);
-            const yMin = dataMax > 0 ? Math.floor(dataMin * 0.85) : 0;
+            const dataMax = Math.max(...allProfitValues, 0);
+            const dataMin = Math.min(...allProfitValues, 0);
+            const yMax = Math.ceil(dataMax * 1.2) || 1;
+            const yMin = dataMin < 0 ? Math.floor(dataMin * 1.2) : 0;
 
             const datasets = config.profitBranches.map((b, i) => {
                 const color = BRANCH_PALETTE[i % BRANCH_PALETTE.length];
