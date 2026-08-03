@@ -55,10 +55,10 @@ class ProductController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        if ($validated['sale_price'] && $validated['sale_price'] >= $validated['price']) {
+        if (($validated['sale_price'] ?? null) && $validated['sale_price'] >= $validated['price']) {
             return back()->withErrors('Harga sale harus lebih kecil dari harga jual.')->withInput();
         }
-        if ($validated['cost_price'] && $validated['cost_price'] > $validated['price']) {
+        if (($validated['cost_price'] ?? null) && $validated['cost_price'] > $validated['price']) {
             return back()->withErrors('Harga modal tidak boleh melebihi harga jual.')->withInput();
         }
 
@@ -67,6 +67,7 @@ class ProductController extends Controller
             $validated['stock'] = 0;
         }
         $validated['stock'] ??= 0;
+        $validated['branch_id'] = session('branch_id');
 
         $validated['image'] = $this->handleImage($request);
 
@@ -97,10 +98,10 @@ class ProductController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        if ($validated['sale_price'] && $validated['sale_price'] >= $validated['price']) {
+        if (($validated['sale_price'] ?? null) && $validated['sale_price'] >= $validated['price']) {
             return back()->withErrors('Harga sale harus lebih kecil dari harga jual.')->withInput();
         }
-        if ($validated['cost_price'] && $validated['cost_price'] > $validated['price']) {
+        if (($validated['cost_price'] ?? null) && $validated['cost_price'] > $validated['price']) {
             return back()->withErrors('Harga modal tidak boleh melebihi harga jual.')->withInput();
         }
 
