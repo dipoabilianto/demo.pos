@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Concerns\HasPeriodQueries;
 use App\Models\Scopes\BranchScope;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class Sale extends Model
 {
-    use HasPeriodQueries;
+    use HasFactory, HasPeriodQueries;
 
     protected $fillable = [
         'invoice_number', 'subtotal', 'discount', 'tax', 'total',

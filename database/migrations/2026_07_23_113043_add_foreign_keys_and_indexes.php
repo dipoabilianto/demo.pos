@@ -67,9 +67,6 @@ return new class extends Migration
             $table->index('branch_id');
         });
 
-        Schema::table('categories', function (Blueprint $table) {
-            $table->index('business_type_id');
-        });
 
         Schema::table('branch_product', function (Blueprint $table) {
             $table->unsignedInteger('stock')->default(0)->change();
@@ -137,9 +134,6 @@ return new class extends Migration
             $table->dropIndex(['branch_id']);
         });
 
-        Schema::table('categories', function (Blueprint $table) {
-            $table->dropIndex(['business_type_id']);
-        });
 
         Schema::table('branch_product', function (Blueprint $table) {
             $table->integer('stock')->default(0)->change();

@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /*
@@ -15,7 +14,6 @@ use Tests\TestCase;
 */
 
 pest()->extend(TestCase::class)
-    ->use(RefreshDatabase::class)
     ->in('Feature');
 
 /*
@@ -44,7 +42,24 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function seedRoles(): void
 {
-    // ..
+    (new \Database\Seeders\RoleSeeder())->run();
+}
+
+function createUserWithRole(string $role, array $attributes = []): \App\Models\User
+{
+    $user = \App\Models\User::factory()->create(array_merge(['role' => $role], $attributes));
+
+    $roleModel = \App\Models\Role::where('name', $role)->first();
+    if ($roleModel) {
+        $user->roles()->attach($roleModel);
+    }
+
+    return $user;
+}
+
+function createSuperadmin(array $attributes = []): \App\Models\User
+{
+    return createUserWithRole('superadmin', $attributes);
 }

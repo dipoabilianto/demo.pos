@@ -4,11 +4,9 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Transaction;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 
-uses(RefreshDatabase::class);
 
 beforeEach(function () {
     seedRoles();

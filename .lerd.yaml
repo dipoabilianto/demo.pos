@@ -1,12 +1,11 @@
 domains:
-    - oribun-app
+  - oribun-app
 php_version: "8.4"
 framework: laravel
 framework_version: "13"
-secured: true
 services:
-    - mysql
+  - mysql
 workers:
-    - queue
-    - schedule
-    - vite
+  - queue
+  - schedule
+  - vite

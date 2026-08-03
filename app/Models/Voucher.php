@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Scopes\BranchScope;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 
 class Voucher extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'code', 'type', 'value', 'min_order', 'max_discount',
         'max_uses', 'max_uses_per_user', 'used_count', 'starts_at',

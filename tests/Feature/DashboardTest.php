@@ -6,9 +6,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
-uses(RefreshDatabase::class);
 
 beforeEach(function () {
     seedRoles();

@@ -3,19 +3,12 @@
 namespace Tests\Feature;
 
 use App\Models\Voucher;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\RefreshDatabaseState;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\Test;
-use Tests\Support\FixSQLiteTransactionLeak;
 use Tests\TestCase;
 
 class VoucherTest extends TestCase
 {
-    use RefreshDatabase, FixSQLiteTransactionLeak {
-        FixSQLiteTransactionLeak::refreshTestDatabase insteadof RefreshDatabase;
-    }
-
     protected function setUp(): void
     {
         parent::setUp();
