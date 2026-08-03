@@ -167,11 +167,11 @@ function initMobileCart() {
         renderCartSidebar(getCart());
     };
 
-    function closeCartMobile() {
+    window.closeCartMobile = function () {
         overlayMobile.classList.add('opacity-0');
         sidebarMobile.classList.add('translate-x-full');
         setTimeout(() => { sidebarMobile.classList.add('hidden'); overlayMobile.classList.add('hidden'); }, 300);
-    }
+    };
 
     document.getElementById('cart-toggle-mobile')?.addEventListener('click', openCartMobile);
     document.getElementById('cart-close-mobile')?.addEventListener('click', closeCartMobile);
