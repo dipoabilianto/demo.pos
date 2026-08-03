@@ -316,6 +316,43 @@ test('kasir cannot create an invoice for another kasir\'s order', function () {
     $response->assertStatus(403);
 });
 
+test('public payment page opens regardless of the viewer\'s own session branch', function () {
+    // Regression: Order::resolveRouteBinding() used to go through the default Eloquent
+    // query, which applies BranchScope. {order:public_token} bound that way meant the
+    // order vanished from the binding query whenever the *viewer's* session branch
+    // differed from the *order's* branch — 404ing a guest's own payment link if they'd
+    // ever been staff-logged-in on another branch in that browser, and blocking staff
+    // from opening a colleague's cross-branch link entirely. Reproduced live: a fresh
+    // superadmin login switched to branch B, then opening a branch-A order's public
+    // payment link 404'd; switching back to branch A (or logging out) made it work.
+    $orderBranch = \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => true]);
+    $viewerBranch = \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => true]);
+    $order = Order::factory()->create(['branch_id' => $orderBranch->id]);
+
+    $user = createUserWithRole('kasir');
+    session(['branch_id' => $viewerBranch->id]);
+
+    $response = $this->actingAs($user)->get(route('orders.public-payment', $order));
+
+    $response->assertStatus(200);
+});
+
+test('superadmin can open another branch\'s order via the internal payment route', function () {
+    $orderBranch = \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => true]);
+    $viewerBranch = \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => true]);
+    $order = Order::factory()->create([
+        'branch_id' => $orderBranch->id,
+        'payment_status' => 'pending',
+    ]);
+
+    $user = createUserWithRole('superadmin', ['email' => 'superadmin@oribun.app']);
+    session(['branch_id' => $viewerBranch->id]);
+
+    $response = $this->actingAs($user)->get(route('orders.payment', $order));
+
+    $response->assertStatus(200);
+});
+
 test('a promotion missing optional fields does not crash the storefront', function () {
     // Regression: public-catalog.blade.php used to access $promo['description'] etc.
     // directly, so a promo entry saved without every key (partial form submit, manual

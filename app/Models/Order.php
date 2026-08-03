@@ -20,6 +20,21 @@ class Order extends Model
         return $this->belongsTo(Branch::class);
     }
 
+    /**
+     * Route model binding (both {order} by id and {order:public_token}) must not go
+     * through BranchScope: it would silently 404 a real order whenever the *viewer's*
+     * session branch differs from the *order's* branch — blocking a guest's public
+     * payment/receipt link (guests have no session branch, so this mainly hit staff
+     * previewing another branch's link) and even a superadmin opening another branch's
+     * order, despite the controller's own ownership/role checks already being the real
+     * gatekeeper for those actions. Scoping still applies normally to every other
+     * Order query (history/index pages), which is where it belongs.
+     */
+    public function resolveRouteBinding($value, $field = null): ?self
+    {
+        return $this->withoutGlobalScopes()->where($field ?? $this->getRouteKeyName(), $value)->first();
+    }
+
     protected $fillable = [
         'order_number', 'customer_name', 'customer_phone', 'customer_email',
         'shipping_address', 'payment_method', 'payment_status', 'order_status',
