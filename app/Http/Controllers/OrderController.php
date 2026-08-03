@@ -73,7 +73,7 @@ class OrderController extends Controller
         $firstVal = $request->query($firstKey);
         $branchId = $request->query('branch_id')
             ?? $request->query('branch')
-            ?? (is_numeric($firstKey) && $firstVal === '' ? $firstKey : null)
+            ?? (is_numeric($firstKey) && ($firstVal === '' || $firstVal === null) ? $firstKey : null)
             ?? (is_numeric($firstVal) ? $firstVal : null)
             ?? session('branch_id');
         $branch = $branchId ? Branch::find($branchId) : null;

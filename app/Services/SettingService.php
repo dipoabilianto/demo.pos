@@ -47,10 +47,7 @@ class SettingService
         'login_logo' => null,
         'login_description' => '',
         'login_background' => null,
-        'promotions' => [
-            ['id' => 1, 'title' => 'Promo Spesial!', 'description' => 'Dapatkan penawaran menarik setiap harinya. Pesan sekarang!', 'link' => '', 'active' => true],
-            ['id' => 2, 'title' => 'Kue Baru!', 'description' => 'Coba kreasi terbaru dari kami, rasa yang bikin nagih!', 'link' => '', 'active' => true],
-        ],
+        'promotions' => [],
         'tax_enabled' => false,
         'tax_name' => 'PPN',
         'tax_rate' => 11,
