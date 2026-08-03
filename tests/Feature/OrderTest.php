@@ -260,6 +260,62 @@ test('legacy ?branch_id= link redirects to that branch\'s canonical URL, not the
     $response->assertRedirect(route('orders.public-catalog', $intended));
 });
 
+test('guest can pay their own public order via cash without logging in', function () {
+    // Regression: the invoice route required 'auth', so the public payment page's "Bayar"
+    // button — which posts here for every payment method, cash included — always bounced
+    // a real, unauthenticated customer to /login instead of completing their payment.
+    $branch = \App\Models\Branch::factory()->create(['is_online' => true, 'is_active' => true]);
+    $order = Order::factory()->create([
+        'branch_id' => $branch->id,
+        'user_id' => null,
+        'payment_status' => 'pending',
+        'order_status' => 'pending',
+        'created_at' => now(),
+    ]);
+
+    $response = $this->postJson(route('orders.invoice', $order), [
+        'payment_method' => 'cash',
+        'is_public' => true,
+    ]);
+
+    $response->assertStatus(200);
+    $response->assertJson(['success' => true, 'is_direct' => true]);
+});
+
+test('kasir creating an invoice for their own internal order still marks it paid directly', function () {
+    $user = createUserWithRole('kasir');
+    $order = Order::factory()->create([
+        'user_id' => $user->id,
+        'payment_status' => 'pending',
+        'order_status' => 'pending',
+        'created_at' => now(),
+    ]);
+
+    $response = $this->actingAs($user)->postJson(route('orders.invoice', $order), [
+        'payment_method' => 'cash',
+    ]);
+
+    $response->assertStatus(200);
+    $response->assertJson(['success' => true, 'paid_directly' => true]);
+});
+
+test('kasir cannot create an invoice for another kasir\'s order', function () {
+    $owner = createUserWithRole('kasir');
+    $otherKasir = createUserWithRole('kasir');
+    $order = Order::factory()->create([
+        'user_id' => $owner->id,
+        'payment_status' => 'pending',
+        'order_status' => 'pending',
+        'created_at' => now(),
+    ]);
+
+    $response = $this->actingAs($otherKasir)->postJson(route('orders.invoice', $order), [
+        'payment_method' => 'cash',
+    ]);
+
+    $response->assertStatus(403);
+});
+
 test('a promotion missing optional fields does not crash the storefront', function () {
     // Regression: public-catalog.blade.php used to access $promo['description'] etc.
     // directly, so a promo entry saved without every key (partial form submit, manual

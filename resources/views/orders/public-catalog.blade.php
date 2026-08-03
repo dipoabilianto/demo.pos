@@ -393,7 +393,7 @@
     </button>
 </div>
 
-<div id="toast-container" class="fixed bottom-16 right-5 sm:bottom-16 sm:right-6 z-[60] space-y-1.5 pointer-events-none"></div>
+<div id="toast-container" class="fixed bottom-16 right-5 sm:bottom-16 sm:right-6 z-[90] space-y-1.5 pointer-events-none"></div>
 
 <script>document.addEventListener('alpine:init', function () {
     initPublicCatalog({

@@ -99,7 +99,7 @@ Route::prefix('orders')->name('orders.')->group(function () {
     Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout')->middleware('auth');
     Route::post('/', [OrderController::class, 'store'])->name('store')->middleware('auth');
     Route::get('/{order}/payment', [OrderController::class, 'payment'])->name('payment')->middleware('auth');
-    Route::post('/{order}/invoice', [OrderController::class, 'createInvoice'])->name('invoice')->middleware(['auth', 'throttle:10,60']);
+    Route::post('/{order}/invoice', [OrderController::class, 'createInvoice'])->name('invoice')->middleware('throttle:10,60');
 });
 
 Route::get('/api/orders/latest', function (\Illuminate\Http\Request $request) {

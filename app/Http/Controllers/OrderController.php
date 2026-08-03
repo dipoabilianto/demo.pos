@@ -518,7 +518,7 @@ class OrderController extends Controller
 
     public function createInvoice(Request $request, Order $order): JsonResponse
     {
-        if (! auth()->user()->isSuperadmin() && $order->user_id && $order->user_id !== auth()->id()) {
+        if (auth()->check() && ! auth()->user()->isSuperadmin() && $order->user_id && $order->user_id !== auth()->id()) {
             return response()->json(['error' => 'Anda tidak memiliki akses ke pesanan ini.'], 403);
         }
 
