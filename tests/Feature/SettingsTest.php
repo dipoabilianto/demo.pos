@@ -141,6 +141,36 @@ test('two factor setup requires security permission', function () {
     $response->assertStatus(403);
 });
 
+test('uploading a promo image for the global scope does not fork a branch-specific override', function () {
+    // Regression: uploadPromoImage() used to save through the admin's own session
+    // branch instead of the scope the open form was actually editing, so uploading
+    // an image while editing the global promo silently created a duplicate,
+    // branch-only override behind the admin's back.
+    Storage::fake('public');
+    $user = createSuperadmin();
+    $branch = \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => true]);
+    session(['branch_id' => $branch->id]);
+
+    $this->actingAs($user)->post(route('settings.update'), [
+        'promotions_branch_id' => '',
+        'promotions' => [
+            ['id' => 1, 'title' => 'Promo Global', 'description' => '', 'link' => '', 'active' => true],
+        ],
+    ])->assertRedirect();
+
+    $this->actingAs($user)->post(route('settings.upload-promo-image'), [
+        'image' => UploadedFile::fake()->image('promo.png'),
+        'promo_id' => 1,
+        'promotions_branch_id' => '',
+    ])->assertJson(['success' => true]);
+
+    expect(Setting::where('key', 'promotions')->whereNull('branch_id')->exists())->toBeTrue();
+    expect(Setting::where('key', 'promotions')->where('branch_id', $branch->id)->exists())->toBeFalse();
+
+    $settingService = app(\App\Services\SettingService::class);
+    expect(collect($settingService->getSettings()['promotions'])->firstWhere('id', 1)['image'] ?? null)->not->toBeNull();
+});
+
 test('a promotion saved with no branch target applies to every branch by default', function () {
     $user = createSuperadmin();
     $branchA = \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => true]);

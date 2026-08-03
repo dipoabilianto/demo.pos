@@ -103,6 +103,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call(RawMaterialSeeder::class);
         $this->call(VoucherSeeder::class);
+        $this->call(PromotionSeeder::class);
     }
 
     private function migrateExistingUsers(): void

@@ -50,21 +50,25 @@ class SettingsController extends Controller
         $request->validate([
             'image' => 'required|image|mimes:png,jpg,jpeg,gif,webp|max:2048',
             'promo_id' => 'required|integer',
+            'promotions_branch_id' => 'nullable|integer|exists:branches,id',
         ]);
 
         $path = $request->file('image')->store('promotions', 'public');
-        $settings = $this->getSettings();
+        $branchId = $request->filled('promotions_branch_id') ? (int) $request->input('promotions_branch_id') : null;
 
-        if (isset($settings['promotions'])) {
-            foreach ($settings['promotions'] as &$promo) {
-                if (($promo['id'] ?? null) == $request->promo_id) {
-                    $promo['image'] = $path;
-                    break;
-                }
+        // Must edit the exact same scope the open form is targeting (global or one
+        // branch), not the admin's own session branch — otherwise an upload while
+        // editing the global promo silently forks a branch-specific override instead.
+        $promotions = $this->settingService->getRawScopedValue('promotions', $branchId) ?? [];
+        foreach ($promotions as &$promo) {
+            if (($promo['id'] ?? null) == $request->promo_id) {
+                $promo['image'] = $path;
+                break;
             }
         }
+        unset($promo);
 
-        $this->settingService->saveSettings($settings);
+        $this->settingService->saveSettings(['promotions' => $promotions], $branchId);
 
         return response()->json(['success' => true, 'path' => $path]);
     }
