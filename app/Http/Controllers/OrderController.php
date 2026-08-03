@@ -408,7 +408,18 @@ class OrderController extends Controller
             };
         }
 
-        $orders = $query->latest()->paginate(20)->withQueryString();
+        $orders = $query
+            ->orderByRaw("
+                CASE
+                    WHEN order_status = 'completed' THEN 4
+                    WHEN order_status = 'cancelled' THEN 5
+                    WHEN processed_by IS NOT NULL THEN 2
+                    WHEN payment_status IN ('paid', 'success') OR payment_method = 'cash' THEN 1
+                    ELSE 3
+                END
+            ")
+            ->orderBy('created_at', 'asc')
+            ->paginate(20)->withQueryString();
         if ($request->boolean('mark_seen')) {
             Order::where('order_number', 'like', 'ORDON-%')->whereNull('seen_at')->update(['seen_at' => now()]);
         }
