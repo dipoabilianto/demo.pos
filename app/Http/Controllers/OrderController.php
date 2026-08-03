@@ -421,6 +421,10 @@ class OrderController extends Controller
             };
         }
 
+        if ($request->boolean('mark_seen')) {
+            (clone $query)->where('order_number', 'like', 'ORDON-%')->whereNull('seen_at')->update(['seen_at' => now()]);
+        }
+
         $orders = $query
             ->orderByRaw("
                 CASE
@@ -433,9 +437,6 @@ class OrderController extends Controller
             ")
             ->orderBy('created_at', 'asc')
             ->paginate(20)->withQueryString();
-        if ($request->boolean('mark_seen')) {
-            Order::where('order_number', 'like', 'ORDON-%')->whereNull('seen_at')->update(['seen_at' => now()]);
-        }
         $unseenCount = Order::where('order_number', 'like', 'ORDON-%')->whereNull('seen_at')->count();
         $paymentMethods = PaymentMethod::all(['code', 'name']);
         $settings = $this->settingService->getSettings();
