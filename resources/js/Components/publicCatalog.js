@@ -459,6 +459,12 @@ function initHeaderShrink() {
 
 export function initPublicCatalog(cfg) {
     config = cfg;
+    // Cart used to live under one unscoped 'cart_public' cookie shared by
+    // every branch; now that it's per-branch (cart_public_{id}), drop any
+    // leftover old cookie instead of leaving it to silently reappear.
+    if (getCookie('cart_public') !== null) {
+        setCookie('cart_public', '', -1);
+    }
     initAddToCart();
     initCategoryFilters();
     initBackPrevention();
