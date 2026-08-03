@@ -71,7 +71,12 @@ class PaymentService
 
     public function checkVoucherAvailability(string $code, int $branchId, float $subtotal): array
     {
-        $voucher = Voucher::where('code', $code)
+        // withoutGlobalScopes(): $branchId is the branch being browsed (from the URL),
+        // not necessarily session('branch_id') — a logged-in admin checking a voucher
+        // for a different branch than the one in their own session must not have it
+        // filtered out by BranchScope on top of the explicit branch condition below.
+        $voucher = Voucher::withoutGlobalScopes()
+            ->where('code', $code)
             ->where(function ($q) use ($branchId) {
                 $q->where('branch_id', $branchId)
                   ->orWhereNull('branch_id');

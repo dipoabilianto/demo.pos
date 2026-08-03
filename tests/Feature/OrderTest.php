@@ -224,6 +224,25 @@ test('public catalog still renders an active branch that is temporarily offline,
     $response->assertViewHas('isOnline', false);
 });
 
+test('public catalog shows the branch\'s own products even when the viewer is staff logged in on a different branch', function () {
+    // Regression: getPublicCatalogProducts() queried Product::with('category')... without
+    // withoutGlobalScopes(), so ProductBranchScope ANDed in session('branch_id') on top of
+    // the explicit $branch filter. A guest (no session branch) was unaffected, but a
+    // logged-in kasir/admin browsing a DIFFERENT branch's storefront than the one in their
+    // own session got zero products — reproduced live before fixing.
+    $ownBranch = \App\Models\Branch::factory()->create(['is_online' => true, 'is_active' => true]);
+    $otherBranch = \App\Models\Branch::factory()->create(['is_online' => true, 'is_active' => true]);
+    Product::factory()->create(['branch_id' => $otherBranch->id, 'is_active' => true]);
+
+    $user = createUserWithRole('kasir');
+    session(['branch_id' => $ownBranch->id]);
+
+    $response = $this->actingAs($user)->get(route('orders.public-catalog', $otherBranch));
+
+    $response->assertStatus(200);
+    $response->assertViewHas('products', fn ($products) => $products->flatten()->isNotEmpty());
+});
+
 test('bare /orders/public redirects to the canonical per-branch URL', function () {
     $branch = \App\Models\Branch::factory()->create(['is_online' => true, 'is_active' => true]);
 

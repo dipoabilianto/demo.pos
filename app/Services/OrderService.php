@@ -36,7 +36,14 @@ class OrderService
             return $cached;
         }
 
-        $products = Product::with('category')
+        // withoutGlobalScopes(): the branch to show is the one in the URL ($branch,
+        // already resolved via route model binding), not whichever branch happens to be
+        // in session('branch_id'). Without this, an admin/kasir browsing the public
+        // storefront while logged in with a different branch selected got every product
+        // filtered out — ProductBranchScope silently ANDs its own session-branch
+        // condition on top of the explicit $branch filter below.
+        $products = Product::withoutGlobalScopes()
+            ->with('category')
             ->where('is_active', true)
             ->where(function ($q) {
                 $q->where('stock', '>', 0)->orWhere('is_unlimited', true);
