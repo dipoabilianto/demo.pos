@@ -18,8 +18,9 @@ class SettingsController extends Controller
     {
         $settings = $this->getSettings();
         $tab = $request->tab ?? 'general';
+        $currentBranch = session('branch_id') ? \App\Models\Branch::find(session('branch_id')) : null;
 
-        return view('settings.general', compact('settings', 'tab'));
+        return view('settings.general', compact('settings', 'tab', 'currentBranch'));
     }
 
     public function uploadLogo(Request $request)

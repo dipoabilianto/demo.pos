@@ -626,7 +626,12 @@
                         </div>
                         <div>
                             <h3 class="text-base font-semibold text-warm-900">Slider Promosi</h3>
-                            <p class="text-xs text-warm-400">Kelola slide promosi yang tampil di halaman toko online.</p>
+                            <p class="text-xs text-warm-400">
+                                Kelola slide promosi yang tampil di halaman toko online.
+                                @if ($currentBranch)
+                                    Promo ini khusus untuk cabang <strong>{{ $currentBranch->name }}</strong> — cabang lain tidak terpengaruh.
+                                @endif
+                            </p>
                         </div>
                     </div>
                     <button @click="items.push({ id: Date.now(), title: '', description: '', link: '', active: true })" type="button" class="rounded-lg bg-theme-primary px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 transition-colors">

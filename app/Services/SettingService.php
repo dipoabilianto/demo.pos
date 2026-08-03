@@ -62,10 +62,20 @@ class SettingService
         'qris_manual_image' => null,
     ];
 
-    public function getSettings(): array
+    /**
+     * Settings keys that vary per branch instead of applying store-wide.
+     * A branch with no override for one of these keys falls back to the
+     * global value, same as the null-branch_id fallback used for
+     * Product/Voucher elsewhere in the app.
+     */
+    private const BRANCH_SCOPED_KEYS = ['promotions'];
+
+    public function getSettings(?int $branchId = null): array
     {
-        return Cache::remember('app_settings', 300, function () {
-            $rows = Setting::all(['key', 'value']);
+        $branchId ??= session('branch_id');
+
+        $global = Cache::remember('app_settings', 300, function () {
+            $rows = Setting::whereNull('branch_id')->get(['key', 'value']);
             if ($rows->isNotEmpty()) {
                 $settings = [];
                 foreach ($rows as $row) {
@@ -76,17 +86,38 @@ class SettingService
 
             return self::DEFAULTS;
         });
+
+        if ($branchId) {
+            $overrides = Cache::remember("app_settings_branch_{$branchId}", 300, function () use ($branchId) {
+                $rows = Setting::where('branch_id', $branchId)->whereIn('key', self::BRANCH_SCOPED_KEYS)->get(['key', 'value']);
+                $overrides = [];
+                foreach ($rows as $row) {
+                    $overrides[$row->key] = $row->value !== null ? (json_decode($row->value, true) ?? $row->value) : null;
+                }
+                return $overrides;
+            });
+
+            $global = array_merge($global, $overrides);
+        }
+
+        return $global;
     }
 
-    public function saveSettings(array $settings): void
+    public function saveSettings(array $settings, ?int $branchId = null): void
     {
-        DB::transaction(function () use ($settings) {
-            Setting::query()->delete();
+        $branchId ??= session('branch_id');
+
+        $branchScoped = $branchId ? array_intersect_key($settings, array_flip(self::BRANCH_SCOPED_KEYS)) : [];
+        $global = array_diff_key($settings, $branchScoped);
+
+        DB::transaction(function () use ($global) {
+            Setting::whereNull('branch_id')->delete();
             $now = now();
             $insert = [];
-            foreach ($settings as $key => $value) {
+            foreach ($global as $key => $value) {
                 $insert[] = [
                     'key' => $key,
+                    'branch_id' => null,
                     'value' => is_array($value) ? json_encode($value) : (is_bool($value) ? ($value ? '1' : '0') : $value),
                     'created_at' => $now,
                     'updated_at' => $now,
@@ -95,6 +126,16 @@ class SettingService
             Setting::insert($insert);
         });
         Cache::forget('app_settings');
+
+        if ($branchId && $branchScoped) {
+            foreach ($branchScoped as $key => $value) {
+                Setting::updateOrCreate(
+                    ['key' => $key, 'branch_id' => $branchId],
+                    ['value' => is_array($value) ? json_encode($value) : (is_bool($value) ? ($value ? '1' : '0') : $value)]
+                );
+            }
+            Cache::forget("app_settings_branch_{$branchId}");
+        }
     }
 
     public function getGeneralData(Request $request): array
