@@ -19,6 +19,7 @@ class ProductBranchScope implements Scope
         if ($branchId) {
             $builder->where(function ($query) use ($branchId) {
                 $query->where('products.branch_id', $branchId)
+                      ->orWhereNull('products.branch_id')
                       ->orWhereHas('branches', function ($q) use ($branchId) {
                           $q->where('branch_product.branch_id', $branchId);
                       });
