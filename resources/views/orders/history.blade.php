@@ -137,6 +137,7 @@
                     @php
                         $ps = $order->payment_status;
                         $os = $order->order_status;
+                        $canProcess = in_array($ps, ['paid', 'success']) || $order->payment_method === 'cash';
                         $overdue = $ps === 'pending' && $order->created_at->diffInMinutes(now()) > 5;
                         $pColors = ['pending' => ($overdue ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'), 'success' => 'bg-emerald-100 text-emerald-800', 'expired' => 'bg-red-100 text-red-800', 'failed' => 'bg-red-100 text-red-800', 'paid' => 'bg-emerald-100 text-emerald-800'];
                         $pLabels = ['pending' => ($overdue ? 'Belum Dibayar (>5 mnt)' : 'Belum Dibayar'), 'success' => 'Lunas', 'expired' => 'Kadaluwarsa', 'failed' => 'Gagal', 'paid' => 'Lunas'];
@@ -171,10 +172,14 @@
                         <span class="font-medium text-stone-500">Status:</span>
                         <span class="inline-flex items-center rounded-full px-2 py-0.5 font-semibold {{ $oColors[$os] ?? 'bg-stone-100 text-stone-600' }}">{{ $oLabels[$os] ?? $os }}</span>
                         @if (!$order->processed_by && $os !== 'cancelled' && $os !== 'completed')
-                            <form action="{{ route('orders.process', $order) }}" method="POST" class="inline">
-                                @csrf
-                                <button type="submit" class="rounded-lg bg-theme-primary px-3.5 py-1.5 text-xs font-bold text-white hover:opacity-90 active:scale-95 shadow-sm transition-all">Proses</button>
-                            </form>
+                            @if ($canProcess)
+                                <form action="{{ route('orders.process', $order) }}" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit" class="rounded-lg bg-theme-primary px-3.5 py-1.5 text-xs font-bold text-white hover:opacity-90 active:scale-95 shadow-sm transition-all">Proses</button>
+                                </form>
+                            @else
+                                <span class="rounded-lg bg-stone-100 px-3.5 py-1.5 text-xs font-semibold text-stone-400" title="Konfirmasi pembayaran dulu di halaman pembayaran pesanan ini">Menunggu pembayaran</span>
+                            @endif
                         @endif
                         @if ($order->processed_by && $os !== 'completed' && $os !== 'cancelled')
                             <form action="{{ route('orders.complete', $order) }}" method="POST" class="inline">

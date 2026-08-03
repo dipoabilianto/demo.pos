@@ -427,6 +427,12 @@ class OrderController extends Controller
             return back()->with('error', 'Pesanan ini sudah diproses oleh ' . ($order->processedBy->name ?? 'kasir lain'));
         }
 
+        $isPaid = in_array($order->payment_status, ['paid', 'success']);
+        $isCashOnPickup = $order->payment_method === 'cash';
+        if (! $isPaid && ! $isCashOnPickup) {
+            return back()->with('error', 'Pesanan ini belum dibayar. Konfirmasi pembayaran terlebih dahulu sebelum diproses.');
+        }
+
         $order->update([
             'processed_by' => auth()->id(),
             'processed_at' => now(),
