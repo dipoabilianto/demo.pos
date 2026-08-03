@@ -94,7 +94,7 @@ class DatabaseSeeder extends Seeder
             ['code' => 'DANA', 'name' => 'DANA', 'description' => 'E-Wallet', 'group' => 'ewallet'],
             ['code' => 'SHOPEEPAY', 'name' => 'ShopeePay', 'description' => 'E-Wallet', 'group' => 'ewallet'],
             ['code' => 'QRIS', 'name' => 'QRIS', 'description' => 'QRIS', 'group' => 'qris'],
-            ['code' => 'qris_manual', 'name' => 'QRIS Manual', 'description' => 'Scan QRIS', 'group' => 'qris_manual'],
+            ['code' => 'qris_manual', 'name' => 'QRIS Manual', 'description' => 'Scan QRIS', 'group' => 'qris'],
         ];
 
         foreach ($paymentMethods as $method) {
