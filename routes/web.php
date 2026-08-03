@@ -187,7 +187,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{order}/receipt/consumer', [ReceiptController::class, 'orderConsumer'])->name('receipt.consumer')->middleware('role:permission:receipts.view');
         Route::get('/{order}/receipt/kitchen', [ReceiptController::class, 'orderKitchen'])->name('receipt.kitchen')->middleware('role:permission:receipts.view');
         Route::post('/{order}/cancel', [OrderController::class, 'cancel'])->name('cancel')->middleware('role:permission:orders.view');
-        Route::get('/{id}/items', [OrderController::class, 'getItems'])->name('items')->whereNumber('id');
+        Route::get('/{id}/items', [OrderController::class, 'getItems'])->name('items')->whereNumber('id')->middleware('role:permission:orders.view');
     });
 
     Route::prefix('sales')->name('sales.')->group(function () {

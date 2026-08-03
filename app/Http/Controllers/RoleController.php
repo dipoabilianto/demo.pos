@@ -5,12 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class RoleController extends Controller
 {
     public function index(): \Illuminate\Http\RedirectResponse
     {
         return redirect()->route('settings.general', ['tab' => 'roles']);
+    }
+
+    private function validPermissionKeys(): array
+    {
+        return collect(config('permissions.modules'))
+            ->flatMap(fn ($module) => collect($module['permissions'])->pluck('key'))
+            ->all();
     }
 
     public function store(Request $request): RedirectResponse
@@ -20,6 +28,7 @@ class RoleController extends Controller
             'label' => 'required|string|max:100',
             'description' => 'nullable|string|max:500',
             'permissions' => 'nullable|array',
+            'permissions.*' => Rule::in($this->validPermissionKeys()),
         ]);
 
         $validated['permissions'] = $validated['permissions'] ?? [];
@@ -40,6 +49,7 @@ class RoleController extends Controller
             'label' => 'required|string|max:100',
             'description' => 'nullable|string|max:500',
             'permissions' => 'nullable|array',
+            'permissions.*' => Rule::in($this->validPermissionKeys()),
         ]);
 
         $validated['permissions'] = $validated['permissions'] ?? [];

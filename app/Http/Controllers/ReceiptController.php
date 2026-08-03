@@ -16,6 +16,10 @@ class ReceiptController extends Controller
     ) {}
     public function orderConsumer(Order $order): View
     {
+        if (! auth()->user()->isSuperadmin() && $order->user_id && $order->user_id !== auth()->id()) {
+            abort(403, 'Anda tidak memiliki akses ke pesanan ini.');
+        }
+
         $order->load('items.product', 'voucher', 'transaction', 'user');
         $settings = $this->settingService->getSettings();
         $branch = Branch::find(session('branch_id'));
@@ -24,6 +28,10 @@ class ReceiptController extends Controller
 
     public function orderKitchen(Order $order): View
     {
+        if (! auth()->user()->isSuperadmin() && $order->user_id && $order->user_id !== auth()->id()) {
+            abort(403, 'Anda tidak memiliki akses ke pesanan ini.');
+        }
+
         $order->load('items.product');
         $settings = $this->settingService->getSettings();
         $branch = Branch::find(session('branch_id'));

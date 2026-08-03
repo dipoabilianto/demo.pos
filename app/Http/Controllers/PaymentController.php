@@ -50,6 +50,10 @@ class PaymentController extends Controller
 
     public function createInvoice(Request $request, Sale $sale): JsonResponse|RedirectResponse
     {
+        if ($sale->payment_status === 'paid') {
+            return response()->json(['error' => 'Invoice ini sudah dibayar.'], 422);
+        }
+
         $activeCodes = PaymentMethod::active()->pluck('code')->implode(',');
         $request->validate([
             'payment_method' => 'required|string|in:'.$activeCodes,
@@ -146,7 +150,7 @@ class PaymentController extends Controller
 
                 return response('Invalid signature', 401);
             }
-        } elseif ($callbackToken === $webhookSecret) {
+        } elseif (hash_equals($webhookSecret, $callbackToken)) {
             $verified = true;
         }
 

@@ -55,13 +55,24 @@ class ShiftController extends Controller
         return redirect()->route('shifts.index')->with('success', 'Shift berhasil ditambahkan.');
     }
 
+    private function assertShiftBranchAccess(Shift $shift): void
+    {
+        if (! auth()->user()->isSuperadmin() && $shift->branch_id !== session('branch_id')) {
+            abort(403, 'Anda tidak memiliki akses ke shift cabang lain.');
+        }
+    }
+
     public function edit(Shift $shift): View
     {
+        $this->assertShiftBranchAccess($shift);
+
         return view('shifts.edit', compact('shift'));
     }
 
     public function update(Request $request, Shift $shift): RedirectResponse
     {
+        $this->assertShiftBranchAccess($shift);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'start_time' => 'required|date_format:H:i',
@@ -83,6 +94,8 @@ class ShiftController extends Controller
 
     public function destroy(Shift $shift): RedirectResponse
     {
+        $this->assertShiftBranchAccess($shift);
+
         $shift->schedules()->delete();
         $shift->delete();
 
@@ -97,6 +110,8 @@ class ShiftController extends Controller
             'day_of_week' => 'required|integer|between:1,7',
         ]);
 
+        $this->assertShiftBranchAccess(Shift::findOrFail($validated['shift_id']));
+
         $exists = ShiftUser::where($validated)->exists();
         if ($exists) {
             return back()->withErrors('Karyawan sudah terdaftar di shift ini pada hari tersebut.');
@@ -109,6 +124,8 @@ class ShiftController extends Controller
 
     public function scheduleDestroy(ShiftUser $schedule): RedirectResponse
     {
+        $this->assertShiftBranchAccess($schedule->shift);
+
         $schedule->delete();
 
         return redirect()->route('shifts.index')->with('success', 'Jadwal berhasil dihapus.');
