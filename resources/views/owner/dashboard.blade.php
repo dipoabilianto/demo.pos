@@ -283,9 +283,9 @@
                 <tr class="border-b border-warm-100 hover:bg-warm-50/50 transition-colors">
                     <td class="px-5 py-3">
                         <span class="font-medium text-warm-800">{{ $b['branch']->name }}</span>
-                        @if ($b['branch']->business_types?->isNotEmpty())
+                        @if ($b['branch']->businessTypes?->isNotEmpty())
                         <div class="flex gap-1 mt-0.5">
-                            @foreach ($b['branch']->business_types as $bt)
+                            @foreach ($b['branch']->businessTypes as $bt)
                             <x-ui.badge variant="theme" size="xs">{{ $bt->name }}</x-ui.badge>
                             @endforeach
                         </div>
