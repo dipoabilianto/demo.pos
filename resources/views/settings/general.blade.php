@@ -206,8 +206,7 @@
                                 </div>
                                 <div class="divide-y divide-warm-100">
                                     @foreach ($paymentMethodGroups[$groupKey] as $method)
-                                        <form method="POST" action="{{ route('settings.payment-methods.toggle', $method) }}" class="flex items-center justify-between px-4 py-3 hover:bg-warm-50 transition-colors">
-                                            @csrf
+                                        <div class="flex items-center justify-between px-4 py-3 hover:bg-warm-50 transition-colors">
                                             <div class="min-w-0">
                                                 <p class="text-sm font-medium {{ $method->is_active ? 'text-warm-900' : 'text-warm-400' }} truncate">{{ $method->name }}</p>
                                                 @if ($method->description)
@@ -215,10 +214,10 @@
                                                 @endif
                                             </div>
                                             <label class="relative inline-flex items-center cursor-pointer shrink-0 ml-2">
-                                                <input type="checkbox" onchange="this.form.submit()" {{ $method->is_active ? 'checked' : '' }} {{ $user->hasPermission('payment-methods.toggle') ? '' : 'disabled' }} class="sr-only peer">
+                                                <input type="checkbox" onchange="togglePaymentMethod(this, {{ $method->id }})" {{ $method->is_active ? 'checked' : '' }} {{ $user->hasPermission('payment-methods.toggle') ? '' : 'disabled' }} class="sr-only peer">
                                                 <div class="w-10 h-5 bg-warm-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-theme-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-theme-primary"></div>
                                             </label>
-                                        </form>
+                                        </div>
                                     @endforeach
                                 </div>
                             </div>
@@ -226,6 +225,15 @@
                     @endforeach
                 </div>
             </div>
+            <script>
+                function togglePaymentMethod(checkbox, id) {
+                    checkbox.disabled = true;
+                    fetch('{{ url('/settings/payment-methods') }}/' + id + '/toggle', {
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+                    }).then(() => location.reload()).catch(() => { checkbox.checked = !checkbox.checked; checkbox.disabled = false; });
+                }
+            </script>
             @endif
 
             <div class="rounded-2xl bg-white p-6 shadow-md shadow-warm-900/5 border border-warm-200/50 space-y-5">
