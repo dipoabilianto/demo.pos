@@ -68,7 +68,7 @@
     @php
         $activePromos = array_values(array_filter($settings['promotions'] ?? [], fn($p) => !empty($p['active'])));
         $activePromos = array_map(fn($p) => array_merge($p, [
-            'image' => $p['image'] ? \Illuminate\Support\Facades\Storage::disk('public')->url($p['image']) : null,
+            'image' => ($p['image'] ?? null) ? \Illuminate\Support\Facades\Storage::disk('public')->url($p['image']) : null,
         ]), $activePromos);
     @endphp
     @php $promoCount = count($activePromos); @endphp
