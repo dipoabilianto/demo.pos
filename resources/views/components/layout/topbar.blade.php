@@ -7,9 +7,9 @@
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
             </button>
             <div>
-                <h1 class="text-lg font-semibold text-warm-900">{{ $title }}</h1>
+                <h1 class="text-lg font-semibold text-warm-900">{!! $title !!}</h1>
                 @if ($subtitle)
-                    <p class="text-xs text-warm-500">{{ $subtitle }}</p>
+                    <p class="text-xs text-warm-500">{!! $subtitle !!}</p>
                 @endif
             </div>
         </div>
