@@ -4,25 +4,31 @@ export function promoCarousel(total) {
         total: total,
         timer: null,
         init() {
-            if (this.total > 1) {
-                this.timer = setInterval(() => this.next(), 5000);
-            }
+            this.resetTimer();
         },
         destroy() {
             clearInterval(this.timer);
         },
-        next() {
+        resetTimer() {
+            clearInterval(this.timer);
+            if (this.total > 1) {
+                this.timer = setInterval(() => this.advance(), 5000);
+            }
+        },
+        advance() {
             this.current = (this.current + 1) % this.total;
+        },
+        next() {
+            this.advance();
+            this.resetTimer();
         },
         prev() {
             this.current = (this.current - 1 + this.total) % this.total;
+            this.resetTimer();
         },
         go(i) {
             this.current = i;
-            clearInterval(this.timer);
-            if (this.total > 1) {
-                this.timer = setInterval(() => this.next(), 5000);
-            }
+            this.resetTimer();
         },
     };
 }
