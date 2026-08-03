@@ -76,7 +76,7 @@ async function renderCartSidebar(cart) {
     }
     sidebarLoading = true;
     try {
-        const res = await fetch(config.batchUrl + '?ids=' + ids.join(','), { headers: { 'Accept': 'application/json' } });
+        const res = await fetch(config.batchUrl + '?ids=' + ids.join(',') + '&branch_id=' + config.branchId, { headers: { 'Accept': 'application/json' } });
         checkoutProducts = await res.json();
         let subtotal = 0;
         let html = '';
@@ -270,7 +270,7 @@ function initCheckoutModal() {
         // checkout opens — always refetch here so this modal reflects the
         // current cart instead of a stale or empty product list.
         try {
-            const res = await fetch(config.batchUrl + '?ids=' + ids.join(','), { headers: { 'Accept': 'application/json' } });
+            const res = await fetch(config.batchUrl + '?ids=' + ids.join(',') + '&branch_id=' + config.branchId, { headers: { 'Accept': 'application/json' } });
             checkoutProducts = await res.json();
         } catch (e) {
             itemsEl.classList.add('hidden');

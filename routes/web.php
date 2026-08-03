@@ -57,7 +57,17 @@ Route::get('/api/products/batch', function (Request $request) {
         return response()->json([]);
     }
 
-    return Product::whereIn('id', $ids)->where('is_active', true)->get(['id', 'name', 'price', 'sale_price', 'stock', 'is_unlimited', 'is_sold_out']);
+    $query = Product::whereIn('id', $ids)->where('is_active', true);
+
+    if ($branchId = $request->query('branch_id')) {
+        $query->withoutGlobalScopes()->where(function ($q) use ($branchId) {
+            $q->whereNull('products.branch_id')
+                ->orWhere('products.branch_id', $branchId)
+                ->orWhereHas('branches', fn ($q) => $q->where('branch_product.branch_id', $branchId));
+        });
+    }
+
+    return $query->get(['id', 'name', 'price', 'sale_price', 'stock', 'is_unlimited', 'is_sold_out']);
 })->withoutMiddleware([VerifyCsrfToken::class]);
 
 Route::get('/api/products/search', function (Request $request) {
