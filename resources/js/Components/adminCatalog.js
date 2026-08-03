@@ -257,6 +257,9 @@ window.editOrder = async function (orderId) {
     if (!confirm('Mengedit akan mengosongkan keranjang saat ini. Lanjutkan?')) return;
     try {
         const res = await fetch(config.baseUrl + '/orders/' + orderId + '/items');
+        if (!res.ok) {
+            throw new Error('HTTP ' + res.status + ' loading order ' + orderId + ' items');
+        }
         const items = await res.json();
         const cart = {};
         items.forEach(i => { cart[i.product_id] = i.quantity; });
@@ -265,7 +268,8 @@ window.editOrder = async function (orderId) {
         updateEditModeUI();
         closeCartMobile();
         Alpine.store('toastManager').info('Pesanan dimuat ke keranjang. Silakan edit item.');
-    } catch {
+    } catch (err) {
+        console.error('editOrder failed:', err);
         Alpine.store('toastManager').error('Gagal memuat pesanan');
     }
 };
