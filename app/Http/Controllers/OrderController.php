@@ -359,6 +359,8 @@ class OrderController extends Controller
     {
         Order::where('payment_status', 'pending')
             ->whereNotNull('payment_method')
+            ->where('payment_method', '!=', 'cash')
+            ->whereNull('processed_by')
             ->where('created_at', '<', now()->subMinutes(10))
             ->each(function ($o) {
                 $o->update(['payment_status' => 'failed', 'order_status' => 'cancelled']);
