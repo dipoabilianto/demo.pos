@@ -160,7 +160,7 @@ class SettingsController extends Controller
             'xendit_webhook_secret' => 'nullable|string',
             'promotions' => 'nullable|array',
             'promotions.*.id' => 'nullable|integer',
-            'promotions.*.title' => 'nullable|string|max:255',
+            'promotions.*.title' => 'required|string|max:255',
             'promotions.*.description' => 'nullable|string',
             'promotions.*.link' => 'nullable|url|max:255',
             'promotions.*.image' => 'nullable|string|max:255',
@@ -203,8 +203,6 @@ class SettingsController extends Controller
         $settings = array_merge($settings, $validated);
 
         if (isset($validated['promotions'])) {
-            $promotions = array_values(array_filter($validated['promotions'], fn ($p) => ! empty($p['title'])));
-
             $promotions = array_map(function ($promo) use ($oldPromotions) {
                 if (empty($promo['image'])) {
                     $old = collect($oldPromotions)->firstWhere('id', $promo['id']);
@@ -216,7 +214,7 @@ class SettingsController extends Controller
                 $promo['branch_ids'] = array_map('intval', $promo['branch_ids'] ?? []);
 
                 return $promo;
-            }, $promotions);
+            }, $validated['promotions']);
 
             $settings['promotions'] = $promotions;
         }
