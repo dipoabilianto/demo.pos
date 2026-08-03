@@ -1,5 +1,8 @@
 @extends('layouts.public')
 @section('title', 'Pembayaran - ' . substr($order->order_number ?? '', -4))
+@php
+    $catalogUrl = $order->branch ? route('orders.public-catalog', $order->branch) : route('orders.public-catalog.default');
+@endphp
 @section('content')
 <style>
     @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
@@ -36,7 +39,7 @@
                     </p>
                 </div>
             </div>
-            <a href="{{ route('orders.public-catalog', ['branch_id' => $order->branch_id]) }}" class="flex h-7 w-7 items-center justify-center rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-all">
+            <a href="{{ $catalogUrl }}" class="flex h-7 w-7 items-center justify-center rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-all">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </a>
         </div>
@@ -48,7 +51,7 @@
             </div>
             <h2 class="text-lg font-bold text-emerald-800 mb-1">Pembayaran Berhasil!</h2>
             <p class="text-sm text-stone-500">Pesanan {{ substr($order->order_number, -4) }} telah lunas.</p>
-            <a href="{{ route('orders.public-catalog', ['branch_id' => $order->branch_id]) }}" class="mt-5 inline-flex items-center gap-2 rounded-xl bg-theme-gradient-r px-6 py-3 text-sm font-bold text-white shadow-lg hover:opacity-90 transition-all">Pesan Lagi</a>
+            <a href="{{ $catalogUrl }}" class="mt-5 inline-flex items-center gap-2 rounded-xl bg-theme-gradient-r px-6 py-3 text-sm font-bold text-white shadow-lg hover:opacity-90 transition-all">Pesan Lagi</a>
         </div>
         @else
 
@@ -177,7 +180,7 @@
                 </div>
 
                 <div class="mt-4 text-center">
-                    <a href="{{ route('orders.public-catalog', ['branch_id' => $order->branch_id]) }}" class="text-xs font-medium text-rose-500 hover:text-rose-700 hover:underline transition-colors">Kembali ke Menu</a>
+                    <a href="{{ $catalogUrl }}" class="text-xs font-medium text-rose-500 hover:text-rose-700 hover:underline transition-colors">Kembali ke Menu</a>
                 </div>
             </div>
         </div>
@@ -249,7 +252,7 @@
                 <p class="text-xs text-stone-400 text-center pt-1">Pesanan sedang menunggu pembayaran. Setelah dibayar, kasir akan memproses pesanan Anda.</p>
             </div>
             <div class="px-6 pb-5">
-                <a href="{{ route('orders.public-catalog', ['branch_id' => $order->branch_id]) }}" class="block w-full text-center rounded-xl bg-theme-gradient-r px-5 py-2.5 text-sm font-bold text-white shadow-lg hover:opacity-90 transition-all">
+                <a href="{{ $catalogUrl }}" class="block w-full text-center rounded-xl bg-theme-gradient-r px-5 py-2.5 text-sm font-bold text-white shadow-lg hover:opacity-90 transition-all">
                     Kembali ke Menu
                 </a>
             </div>
@@ -304,7 +307,7 @@
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 14.25l.75-.75c.418-.418.418-1.082 0-1.5l-.75-.75m4.5 0l-.75.75a1.056 1.056 0 000 1.5l.75.75M9 9.75l-2.25 2.25M15 9.75l2.25 2.25M9 14.25l-2.25 2.25M15 14.25l2.25 2.25M16.5 3.75H7.5a3 3 0 00-3 3v10.5a3 3 0 003 3h9a3 3 0 003-3V6.75a3 3 0 00-3-3z"/></svg>
                     Cetak Bukti Pembayaran
                 </button>
-                <a href="{{ route('orders.public-catalog', ['branch_id' => $order->branch_id]) }}" class="block w-full text-center rounded-xl bg-theme-gradient-r px-5 py-2.5 text-sm font-bold text-white shadow-lg hover:opacity-90 transition-all">
+                <a href="{{ $catalogUrl }}" class="block w-full text-center rounded-xl bg-theme-gradient-r px-5 py-2.5 text-sm font-bold text-white shadow-lg hover:opacity-90 transition-all">
                     Tutup
                 </a>
             </div>
@@ -325,7 +328,7 @@
                 <p id="pay-error-popup-text" class="text-sm text-stone-600 leading-relaxed"></p>
             </div>
             <div class="px-6 pb-5">
-                <a href="{{ route('orders.public-catalog', ['branch_id' => $order->branch_id]) }}" class="block w-full text-center rounded-xl bg-theme-gradient-r px-5 py-2.5 text-sm font-bold text-white shadow-lg hover:opacity-90 transition-all">
+                <a href="{{ $catalogUrl }}" class="block w-full text-center rounded-xl bg-theme-gradient-r px-5 py-2.5 text-sm font-bold text-white shadow-lg hover:opacity-90 transition-all">
                     Kembali ke Menu
                 </a>
             </div>
@@ -336,7 +339,7 @@
 </div>
 
 <div class="text-center py-4 text-xs text-stone-400 border-t border-stone-100 bg-white/50 max-w-lg mx-auto rounded-b-2xl">
-    <a href="{{ route('orders.public-catalog', ['branch_id' => $order->branch_id]) }}" class="hover:text-stone-600 transition-colors">&larr; Kembali ke Menu</a>
+    <a href="{{ $catalogUrl }}" class="hover:text-stone-600 transition-colors">&larr; Kembali ke Menu</a>
 </div>
 @endsection
 

@@ -67,19 +67,36 @@ class OrderController extends Controller
         return view('orders.catalog', compact('products', 'settings'));
     }
 
-    public function publicCatalog(Request $request): View
+    public function publicCatalog(Branch $branch): View
     {
-        $branchId = $request->query('branch_id') ?? $request->query('branch') ?? session('branch_id');
-        $branch = $branchId ? Branch::find($branchId) : null;
-        $branch = $branch?->is_online ? $branch : Branch::active()->online()->first();
+        abort_unless($branch->is_active, 404);
 
         $products = $this->orderService->getPublicCatalogProducts($branch);
-
-        $settings = $this->settingService->getSettings($branch?->id);
+        $settings = $this->settingService->getSettings($branch->id);
         $previewOrderNumber = Order::previewOrderNumber('ORDON');
-        $isOnline = $branch->is_online ?? false;
+        $isOnline = $branch->is_online;
 
         return view('orders.public-catalog', compact('products', 'settings', 'previewOrderNumber', 'branch', 'isOnline'));
+    }
+
+    /**
+     * Legacy/no-branch entry point (/orders/public with no slug segment, including the old
+     * ?branch_id=/?branch= query-string links from before the canonical /{branch:slug} URL
+     * existed) — resolves the best available branch and redirects to its canonical URL so
+     * the storefront always has exactly one real, bookmarkable link per branch.
+     */
+    public function publicCatalogDefault(Request $request): RedirectResponse
+    {
+        $queryBranchId = $request->query('branch_id') ?? $request->query('branch');
+        $queryBranch = $queryBranchId ? Branch::find($queryBranchId) : null;
+        $sessionBranch = session('branch_id') ? Branch::find(session('branch_id')) : null;
+
+        $branch = collect([$queryBranch, $sessionBranch])->first(fn ($b) => $b?->is_active)
+            ?? Branch::active()->online()->first();
+
+        abort_unless($branch, 404, 'Belum ada cabang yang menerima pesanan online saat ini.');
+
+        return redirect()->route('orders.public-catalog', $branch);
     }
 
     public function checkout(Request $request): View

@@ -100,27 +100,44 @@ class SettingService
         return $global;
     }
 
-    public function saveSettings(array $settings, ?int $branchId = null): void
+    /**
+     * The raw, un-merged value of a branch-scoped key for exactly one scope — global
+     * (branchId null) or one specific branch — with no fallback to the other. Used to
+     * populate an edit form so saving never silently forks an inherited value into an
+     * unintended per-branch override.
+     */
+    public function getRawScopedValue(string $key, ?int $branchId): mixed
     {
-        $branchId ??= session('branch_id');
+        $value = Setting::where('key', $key)->where('branch_id', $branchId)->value('value');
+
+        return $value !== null ? (json_decode($value, true) ?? $value) : null;
+    }
+
+    /**
+     * $branchId: omit (or pass `false`) to use the current session's branch, as before.
+     * Pass an explicit branch id to scope BRANCH_SCOPED_KEYS to that branch, or explicit
+     * `null` to save them globally (applies to every branch that has no override of its own).
+     */
+    public function saveSettings(array $settings, int|false|null $branchId = false): void
+    {
+        if ($branchId === false) {
+            $branchId = session('branch_id');
+        }
 
         $branchScoped = $branchId ? array_intersect_key($settings, array_flip(self::BRANCH_SCOPED_KEYS)) : [];
         $global = array_diff_key($settings, $branchScoped);
 
+        // Per-key upsert, not delete-then-reinsert: a save that targets a specific branch
+        // deliberately excludes BRANCH_SCOPED_KEYS (like 'promotions') from $global, so a
+        // blanket `whereNull('branch_id')->delete()` here would wipe out an unrelated
+        // global row (e.g. another branch's default promo) that this request never touched.
         DB::transaction(function () use ($global) {
-            Setting::whereNull('branch_id')->delete();
-            $now = now();
-            $insert = [];
             foreach ($global as $key => $value) {
-                $insert[] = [
-                    'key' => $key,
-                    'branch_id' => null,
-                    'value' => is_array($value) ? json_encode($value) : (is_bool($value) ? ($value ? '1' : '0') : $value),
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ];
+                Setting::updateOrCreate(
+                    ['key' => $key, 'branch_id' => null],
+                    ['value' => is_array($value) ? json_encode($value) : (is_bool($value) ? ($value ? '1' : '0') : $value)]
+                );
             }
-            Setting::insert($insert);
         });
         Cache::forget('app_settings');
 

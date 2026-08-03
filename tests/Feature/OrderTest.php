@@ -177,36 +177,85 @@ test('public catalog shows online branch', function () {
         'is_active' => true,
     ]);
 
-    $response = $this->get(route('orders.public-catalog', ['branch_id' => $branch->id]));
+    $response = $this->get(route('orders.public-catalog', $branch));
 
     $response->assertStatus(200);
+    $response->assertViewHas('branch', fn ($resolved) => $resolved->id === $branch->id);
 });
 
-test('public catalog resolves the requested branch, not just any online branch', function () {
+test('public catalog URL is bound to the branch slug, not a guessable id', function () {
+    // The route is /orders/public/{branch:slug} — resolution comes from Eloquent route
+    // model binding on an unambiguous, unique column, not from parsing query strings
+    // (the source of the branch-mixup bugs this route used to have).
     $branchA = \App\Models\Branch::factory()->create(['is_online' => true, 'is_active' => true]);
     $branchB = \App\Models\Branch::factory()->create(['is_online' => true, 'is_active' => true]);
 
-    $response = $this->get(route('orders.public-catalog', ['branch_id' => $branchB->id]));
+    expect(route('orders.public-catalog', $branchB))->toContain($branchB->slug);
 
+    $response = $this->get(route('orders.public-catalog', $branchB));
     $response->assertStatus(200);
-    $response->assertViewHas('branch', fn ($branch) => $branch->id === $branchB->id);
+    $response->assertViewHas('branch', fn ($resolved) => $resolved->id === $branchB->id);
 });
 
-test('public catalog degrades gracefully on a malformed key-less branch query', function () {
-    // route('orders.public-catalog', $branch) with no {branch} URI segment produces a
-    // key-less query string like ?6 instead of ?branch_id=6 — this is what
-    // resources/views/components/layout/topbar.blade.php generated before it was fixed
-    // to pass ['branch_id' => $branch->id] explicitly. The controller no longer tries to
-    // guess a branch out of an arbitrary query key; it must fall back to the default
-    // online branch instead of crashing or resolving an unrelated branch by accident.
+test('public catalog 404s for an unknown branch slug instead of falling back to a different branch', function () {
+    \App\Models\Branch::factory()->create(['is_online' => true, 'is_active' => true]);
+
+    $response = $this->get('/orders/public/this-slug-does-not-exist');
+
+    $response->assertStatus(404);
+});
+
+test('public catalog 404s for a deactivated branch', function () {
+    $branch = \App\Models\Branch::factory()->create(['is_active' => false, 'is_online' => false]);
+
+    $response = $this->get(route('orders.public-catalog', $branch));
+
+    $response->assertStatus(404);
+});
+
+test('public catalog still renders an active branch that is temporarily offline, instead of swapping to another branch', function () {
+    $offlineBranch = \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => false]);
+    \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => true]);
+
+    $response = $this->get(route('orders.public-catalog', $offlineBranch));
+
+    $response->assertStatus(200);
+    $response->assertViewHas('branch', fn ($resolved) => $resolved->id === $offlineBranch->id);
+    $response->assertViewHas('isOnline', false);
+});
+
+test('bare /orders/public redirects to the canonical per-branch URL', function () {
     $branch = \App\Models\Branch::factory()->create(['is_online' => true, 'is_active' => true]);
 
-    $malformedUrl = route('orders.public-catalog', $branch);
-    expect($malformedUrl)->toContain('?'.$branch->id);
+    $response = $this->get(route('orders.public-catalog.default'));
 
-    $response = $this->get($malformedUrl);
+    $response->assertRedirect(route('orders.public-catalog', $branch));
+});
+
+test('legacy ?branch_id= link redirects to that branch\'s canonical URL, not the default one', function () {
+    \App\Models\Branch::factory()->create(['is_online' => true, 'is_active' => true]);
+    $intended = \App\Models\Branch::factory()->create(['is_online' => true, 'is_active' => true]);
+
+    $response = $this->get(route('orders.public-catalog.default').'?branch_id='.$intended->id);
+
+    $response->assertRedirect(route('orders.public-catalog', $intended));
+});
+
+test('a promotion missing optional fields does not crash the storefront', function () {
+    // Regression: public-catalog.blade.php used to access $promo['description'] etc.
+    // directly, so a promo entry saved without every key (partial form submit, manual
+    // data edit) 500'd the entire branch storefront instead of degrading gracefully.
+    $branch = \App\Models\Branch::factory()->create(['is_online' => true, 'is_active' => true]);
+    \App\Models\Setting::create([
+        'key' => 'promotions',
+        'branch_id' => null,
+        'value' => json_encode([['id' => 1, 'title' => 'Promo Tanpa Deskripsi', 'active' => true]]),
+    ]);
+
+    $response = $this->get(route('orders.public-catalog', $branch));
+
     $response->assertStatus(200);
-    $response->assertViewHas('branch', fn ($resolved) => $resolved->is_online && $resolved->is_active);
+    $response->assertSee('Promo Tanpa Deskripsi');
 });
 
 test('public product batch API does not leak another branch products when branch_id is given', function () {

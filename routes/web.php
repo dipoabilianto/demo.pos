@@ -87,16 +87,19 @@ Route::get('/api/products/search', function (Request $request) {
 
 Route::prefix('orders')->name('orders.')->group(function () {
     Route::get('/', [OrderController::class, 'catalog'])->name('catalog')->middleware('auth');
-    Route::get('/public', [OrderController::class, 'publicCatalog'])->name('public-catalog');
+    Route::get('/public', [OrderController::class, 'publicCatalogDefault'])->name('public-catalog.default');
     Route::post('/public/store', [OrderController::class, 'publicStore'])->name('public-store');
     Route::get('/public/check-voucher', [OrderController::class, 'checkVoucher'])->name('public.check-voucher');
+    Route::get('/public/status/{xenditId}', [OrderController::class, 'publicStatus'])->name('public-status');
     Route::get('/public/{order:public_token}/payment', [OrderController::class, 'publicPayment'])->name('public-payment');
+    Route::get('/public/{order:public_token}/receipt', [OrderController::class, 'publicReceipt'])->name('public-receipt');
+    // Canonical, per-branch storefront link — must stay below the literal /public/* routes
+    // above so "store", "check-voucher" etc. never get swallowed as a branch slug.
+    Route::get('/public/{branch:slug}', [OrderController::class, 'publicCatalog'])->name('public-catalog');
     Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout')->middleware('auth');
     Route::post('/', [OrderController::class, 'store'])->name('store')->middleware('auth');
     Route::get('/{order}/payment', [OrderController::class, 'payment'])->name('payment')->middleware('auth');
     Route::post('/{order}/invoice', [OrderController::class, 'createInvoice'])->name('invoice')->middleware(['auth', 'throttle:10,60']);
-    Route::get('/public/status/{xenditId}', [OrderController::class, 'publicStatus'])->name('public-status');
-    Route::get('/public/{order:public_token}/receipt', [OrderController::class, 'publicReceipt'])->name('public-receipt');
 });
 
 Route::get('/api/orders/latest', function (\Illuminate\Http\Request $request) {

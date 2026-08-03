@@ -20,7 +20,7 @@
     <header class="sticky top-0 z-40 glass-strong border-b border-white/30">
         <div class="mx-auto max-w-7xl px-3 sm:px-4">
             <div class="flex h-14 sm:h-16 items-center justify-between">
-                <a href="{{ route('orders.public-catalog', ['branch_id' => $branch->id]) }}" class="flex items-center gap-2.5 group">
+                <a href="{{ route('orders.public-catalog', $branch) }}" class="flex items-center gap-2.5 group">
                     @if (!empty($settings['receipt_logo']))
                         <img src="{{ asset('storage/' . $settings['receipt_logo']) }}" class="h-8 sm:h-9 w-auto object-contain rounded-lg">
                     @else
@@ -68,6 +68,9 @@
     @php
         $activePromos = array_values(array_filter($settings['promotions'] ?? [], fn($p) => !empty($p['active'])));
         $activePromos = array_map(fn($p) => array_merge($p, [
+            'title' => $p['title'] ?? '',
+            'description' => $p['description'] ?? '',
+            'link' => $p['link'] ?? null,
             'image' => ($p['image'] ?? null) ? \Illuminate\Support\Facades\Storage::disk('public')->url($p['image']) : null,
         ]), $activePromos);
     @endphp
@@ -400,7 +403,7 @@
         storeUrl: '{{ route('orders.public-store') }}',
         branchId: {{ $branch->id }},
         baseUrl: '{{ url('') }}',
-        catalogUrl: '{{ route('orders.public-catalog', ['branch_id' => $branch->id]) }}',
+        catalogUrl: '{{ route('orders.public-catalog', $branch) }}',
         checkVoucherUrl: '/orders/public/check-voucher',
     });
 });</script>

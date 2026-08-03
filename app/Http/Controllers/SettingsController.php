@@ -20,7 +20,11 @@ class SettingsController extends Controller
         $tab = $request->tab ?? 'general';
         $currentBranch = session('branch_id') ? \App\Models\Branch::find(session('branch_id')) : null;
 
-        return view('settings.general', compact('settings', 'tab', 'currentBranch'));
+        $branches = \App\Models\Branch::active()->orderBy('name')->get(['id', 'name']);
+        $promotionsBranchId = $request->filled('promotions_branch_id') ? (int) $request->query('promotions_branch_id') : null;
+        $promotionsForTarget = $this->settingService->getRawScopedValue('promotions', $promotionsBranchId) ?? [];
+
+        return view('settings.general', compact('settings', 'tab', 'currentBranch', 'branches', 'promotionsBranchId', 'promotionsForTarget'));
     }
 
     public function uploadLogo(Request $request)
@@ -164,6 +168,7 @@ class SettingsController extends Controller
             'promotions.*.link' => 'nullable|url|max:255',
             'promotions.*.image' => 'nullable|string|max:255',
             'promotions.*.active' => 'nullable|boolean',
+            'promotions_branch_id' => 'nullable|integer|exists:branches,id',
             'tax_enabled' => 'nullable|boolean',
             'tax_name' => 'nullable|string|max:50',
             'tax_rate' => 'nullable|numeric|min:0|max:100',
@@ -182,7 +187,7 @@ class SettingsController extends Controller
             $allowedFields = array_merge($allowedFields, ['receipt_footer_note', 'receipt_kitchen_note', 'receipt_show_prices', 'printer_model', 'printer_paper_size', 'store_hours', 'store_instagram', 'receipt_show_cash_change']);
         }
         if ($user?->hasPermission('settings.promotions')) {
-            $allowedFields = array_merge($allowedFields, ['promotions', 'promotions.*.id', 'promotions.*.title', 'promotions.*.description', 'promotions.*.link', 'promotions.*.image', 'promotions.*.active']);
+            $allowedFields = array_merge($allowedFields, ['promotions', 'promotions.*.id', 'promotions.*.title', 'promotions.*.description', 'promotions.*.link', 'promotions.*.image', 'promotions.*.active', 'promotions_branch_id']);
         }
         if ($user?->hasPermission('settings.appearance')) {
             $allowedFields = array_merge($allowedFields, ['theme_primary', 'theme_sidebar', 'theme_sidebar_text', 'theme_accent']);
@@ -195,11 +200,14 @@ class SettingsController extends Controller
         $validated = $request->validate($rules);
 
         $settings = $this->getSettings();
-        $oldPromotions = $settings['promotions'] ?? [];
-
         $settings = array_merge($settings, $validated);
 
+        $promotionsBranchId = false;
+
         if (isset($validated['promotions'])) {
+            $promotionsBranchId = $validated['promotions_branch_id'] ?? null;
+            $oldPromotions = $this->settingService->getRawScopedValue('promotions', $promotionsBranchId) ?? [];
+
             $promotions = array_values(array_filter($validated['promotions'], fn ($p) => ! empty($p['title'])));
 
             $promotions = array_map(function ($promo) use ($oldPromotions) {
@@ -215,8 +223,9 @@ class SettingsController extends Controller
 
             $settings['promotions'] = $promotions;
         }
+        unset($settings['promotions_branch_id']);
 
-        $this->settingService->saveSettings($settings);
+        $this->settingService->saveSettings($settings, $promotionsBranchId);
 
         return redirect()->back()->with('success', 'Pengaturan berhasil disimpan.');
     }

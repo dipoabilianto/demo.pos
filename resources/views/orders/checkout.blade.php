@@ -41,7 +41,7 @@
                     <p class="text-[11px] text-stone-400">Periksa pesanan sebelum dikonfirmasi</p>
                 </div>
             </div>
-            <a href="{{ route('orders.public-catalog') }}" class="flex h-7 w-7 items-center justify-center rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-all">
+            <a href="{{ route('orders.public-catalog.default') }}" class="flex h-7 w-7 items-center justify-center rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-all">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </a>
         </div>
@@ -66,7 +66,7 @@
                 <div id="cartEmpty" class="hidden flex flex-col items-center py-8 text-stone-400">
                     <svg class="h-10 w-10 mb-2 text-stone-300" fill="none" viewBox="0 0 24 24" stroke-width="0.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
                     <p class="text-sm font-medium text-stone-500">Keranjang masih kosong</p>
-                    <a href="{{ route('orders.public-catalog') }}" class="mt-3 text-xs text-theme-primary underline underline-offset-2">Kembali ke Katalog</a>
+                    <a href="{{ route('orders.public-catalog.default') }}" class="mt-3 text-xs text-theme-primary underline underline-offset-2">Kembali ke Katalog</a>
                 </div>
             </div>
             <div>
@@ -402,7 +402,7 @@
             const result = await resp.json();
             if (!resp.ok) throw new Error(result.error || 'Terjadi kesalahan.');
             setCookie('cart', '{}', -1);
-            window.location.href = result.redirect || (isPublic ? '{{ route('orders.public-catalog') }}' : '{{ route('orders.catalog') }}');
+            window.location.href = result.redirect || (isPublic ? '{{ route('orders.public-catalog.default') }}' : '{{ route('orders.catalog') }}');
         } catch (err) { alert(err.message || 'Gagal membuat pesanan.'); submitBtn.disabled = false; btnLabel.classList.remove('hidden'); btnSpinner.classList.add('hidden'); }
     });
 

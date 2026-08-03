@@ -140,3 +140,62 @@ test('two factor setup requires security permission', function () {
 
     $response->assertStatus(403);
 });
+
+test('a promotion saved with no branch target applies to every branch by default', function () {
+    $user = createSuperadmin();
+    $branchA = \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => true]);
+    $branchB = \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => true]);
+
+    $this->actingAs($user)->post(route('settings.update'), [
+        'promotions_branch_id' => '',
+        'promotions' => [
+            ['id' => 1, 'title' => 'Promo Semua Cabang', 'description' => '', 'link' => '', 'active' => true],
+        ],
+    ])->assertRedirect();
+
+    $settingService = app(\App\Services\SettingService::class);
+    expect(collect($settingService->getSettings($branchA->id)['promotions'])->pluck('title'))->toContain('Promo Semua Cabang');
+    expect(collect($settingService->getSettings($branchB->id)['promotions'])->pluck('title'))->toContain('Promo Semua Cabang');
+});
+
+test('a promotion saved for one specific branch does not apply to other branches', function () {
+    $user = createSuperadmin();
+    $branchA = \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => true]);
+    $branchB = \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => true]);
+
+    $this->actingAs($user)->post(route('settings.update'), [
+        'promotions_branch_id' => $branchA->id,
+        'promotions' => [
+            ['id' => 1, 'title' => 'Promo Khusus A', 'description' => '', 'link' => '', 'active' => true],
+        ],
+    ])->assertRedirect();
+
+    $settingService = app(\App\Services\SettingService::class);
+    expect(collect($settingService->getSettings($branchA->id)['promotions'])->pluck('title'))->toContain('Promo Khusus A');
+    expect(collect($settingService->getSettings($branchB->id)['promotions'])->pluck('title'))->not->toContain('Promo Khusus A');
+});
+
+test('saving a branch-specific promotion does not wipe the global promotion or other global settings', function () {
+    $user = createSuperadmin();
+    $branchA = \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => true]);
+    $branchB = \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => true]);
+
+    $this->actingAs($user)->post(route('settings.update'), [
+        'store_name' => 'Toko Global Harus Tetap Ada',
+        'promotions_branch_id' => '',
+        'promotions' => [
+            ['id' => 1, 'title' => 'Promo Global', 'description' => '', 'link' => '', 'active' => true],
+        ],
+    ])->assertRedirect();
+
+    $this->actingAs($user)->post(route('settings.update'), [
+        'promotions_branch_id' => $branchB->id,
+        'promotions' => [
+            ['id' => 2, 'title' => 'Promo Khusus B', 'description' => '', 'link' => '', 'active' => true],
+        ],
+    ])->assertRedirect();
+
+    $settingService = app(\App\Services\SettingService::class);
+    expect($settingService->getSettings()['store_name'])->toBe('Toko Global Harus Tetap Ada');
+    expect(collect($settingService->getSettings($branchA->id)['promotions'])->pluck('title'))->toContain('Promo Global');
+});
