@@ -203,7 +203,20 @@ class OrderController extends Controller
             DB::beginTransaction();
 
             $productIds = collect($validated['items'])->pluck('product_id');
-            $lockedProducts = Product::whereIn('id', $productIds)->lockForUpdate()->get()->keyBy('id');
+            $lockedProducts = Product::withoutGlobalScopes()
+                ->whereIn('id', $productIds)
+                ->where(function ($q) use ($branchId) {
+                    $q->whereNull('branch_id')
+                        ->orWhere('branch_id', $branchId)
+                        ->orWhereHas('branches', fn ($q) => $q->where('branch_product.branch_id', $branchId));
+                })
+                ->lockForUpdate()->get()->keyBy('id');
+
+            if ($lockedProducts->count() !== $productIds->unique()->count()) {
+                DB::rollBack();
+
+                return response()->json(['error' => 'Salah satu produk tidak tersedia di cabang ini.'], 422);
+            }
 
             $subtotal = 0;
             $orderItems = [];

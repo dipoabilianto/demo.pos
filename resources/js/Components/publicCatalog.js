@@ -39,8 +39,9 @@ function setCookie(name, value, days = 7) {
     document.cookie = `${name}=${value}; path=/; expires=${d.toUTCString()}`;
 }
 
-function getCart() { try { return JSON.parse(getCookie('cart_public') || '{}'); } catch { return {}; } }
-function saveCart(cart) { setCookie('cart_public', JSON.stringify(cart)); updateCartUI(cart); }
+function cartCookieName() { return 'cart_public_' + config.branchId; }
+function getCart() { try { return JSON.parse(getCookie(cartCookieName()) || '{}'); } catch { return {}; } }
+function saveCart(cart) { setCookie(cartCookieName(), JSON.stringify(cart)); updateCartUI(cart); }
 
 let sidebarLoading = false;
 let sidebarPending = false;
@@ -362,7 +363,7 @@ function initCheckoutModal() {
             });
             const result = await resp.json();
             if (!resp.ok) throw new Error(result.error || 'Terjadi kesalahan.');
-            setCookie('cart_public', '{}', -1);
+            setCookie(cartCookieName(), '{}', -1);
             window.location.href = result.redirect || (result.branch_slug ? config.baseUrl + '/public/' + result.branch_slug : config.catalogUrl);
         } catch (err) {
             showToast('<svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>', err.message || 'Gagal membuat pesanan', 'rose');
