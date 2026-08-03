@@ -141,43 +141,34 @@ test('two factor setup requires security permission', function () {
     $response->assertStatus(403);
 });
 
-test('uploading a promo image for the global scope does not fork a branch-specific override', function () {
-    // Regression: uploadPromoImage() used to save through the admin's own session
-    // branch instead of the scope the open form was actually editing, so uploading
-    // an image while editing the global promo silently created a duplicate,
-    // branch-only override behind the admin's back.
+test('uploading a promo image updates that promo without losing the others', function () {
     Storage::fake('public');
     $user = createSuperadmin();
-    $branch = \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => true]);
-    session(['branch_id' => $branch->id]);
 
     $this->actingAs($user)->post(route('settings.update'), [
-        'promotions_branch_id' => '',
         'promotions' => [
-            ['id' => 1, 'title' => 'Promo Global', 'description' => '', 'link' => '', 'active' => true],
+            ['id' => 1, 'title' => 'Promo Satu', 'description' => '', 'link' => '', 'active' => true],
+            ['id' => 2, 'title' => 'Promo Dua', 'description' => '', 'link' => '', 'active' => true],
         ],
     ])->assertRedirect();
 
     $this->actingAs($user)->post(route('settings.upload-promo-image'), [
         'image' => UploadedFile::fake()->image('promo.png'),
-        'promo_id' => 1,
-        'promotions_branch_id' => '',
+        'promo_id' => 2,
     ])->assertJson(['success' => true]);
 
-    expect(Setting::where('key', 'promotions')->whereNull('branch_id')->exists())->toBeTrue();
-    expect(Setting::where('key', 'promotions')->where('branch_id', $branch->id)->exists())->toBeFalse();
-
     $settingService = app(\App\Services\SettingService::class);
-    expect(collect($settingService->getSettings()['promotions'])->firstWhere('id', 1)['image'] ?? null)->not->toBeNull();
+    $promotions = collect($settingService->getSettings()['promotions']);
+    expect($promotions->firstWhere('id', 1)['title'])->toBe('Promo Satu');
+    expect($promotions->firstWhere('id', 2)['image'] ?? null)->not->toBeNull();
 });
 
-test('a promotion saved with no branch target applies to every branch by default', function () {
+test('a promotion saved with no branch checked applies to every branch by default', function () {
     $user = createSuperadmin();
     $branchA = \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => true]);
     $branchB = \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => true]);
 
     $this->actingAs($user)->post(route('settings.update'), [
-        'promotions_branch_id' => '',
         'promotions' => [
             ['id' => 1, 'title' => 'Promo Semua Cabang', 'description' => '', 'link' => '', 'active' => true],
         ],
@@ -188,15 +179,14 @@ test('a promotion saved with no branch target applies to every branch by default
     expect(collect($settingService->getSettings($branchB->id)['promotions'])->pluck('title'))->toContain('Promo Semua Cabang');
 });
 
-test('a promotion saved for one specific branch does not apply to other branches', function () {
+test('a promotion checked for one branch does not apply to other branches', function () {
     $user = createSuperadmin();
     $branchA = \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => true]);
     $branchB = \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => true]);
 
     $this->actingAs($user)->post(route('settings.update'), [
-        'promotions_branch_id' => $branchA->id,
         'promotions' => [
-            ['id' => 1, 'title' => 'Promo Khusus A', 'description' => '', 'link' => '', 'active' => true],
+            ['id' => 1, 'title' => 'Promo Khusus A', 'description' => '', 'link' => '', 'active' => true, 'branch_ids' => [$branchA->id]],
         ],
     ])->assertRedirect();
 
@@ -205,27 +195,38 @@ test('a promotion saved for one specific branch does not apply to other branches
     expect(collect($settingService->getSettings($branchB->id)['promotions'])->pluck('title'))->not->toContain('Promo Khusus A');
 });
 
-test('saving a branch-specific promotion does not wipe the global promotion or other global settings', function () {
+test('a promotion can be checked for multiple specific branches at once', function () {
     $user = createSuperadmin();
     $branchA = \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => true]);
     $branchB = \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => true]);
+    $branchC = \App\Models\Branch::factory()->create(['is_active' => true, 'is_online' => true]);
 
     $this->actingAs($user)->post(route('settings.update'), [
-        'store_name' => 'Toko Global Harus Tetap Ada',
-        'promotions_branch_id' => '',
         'promotions' => [
-            ['id' => 1, 'title' => 'Promo Global', 'description' => '', 'link' => '', 'active' => true],
+            ['id' => 1, 'title' => 'Promo Dua Cabang', 'description' => '', 'link' => '', 'active' => true, 'branch_ids' => [$branchA->id, $branchB->id]],
         ],
     ])->assertRedirect();
 
+    $settingService = app(\App\Services\SettingService::class);
+    expect(collect($settingService->getSettings($branchA->id)['promotions'])->pluck('title'))->toContain('Promo Dua Cabang');
+    expect(collect($settingService->getSettings($branchB->id)['promotions'])->pluck('title'))->toContain('Promo Dua Cabang');
+    expect(collect($settingService->getSettings($branchC->id)['promotions'])->pluck('title'))->not->toContain('Promo Dua Cabang');
+});
+
+test('saving promotions does not wipe unrelated global settings', function () {
+    $user = createSuperadmin();
+
     $this->actingAs($user)->post(route('settings.update'), [
-        'promotions_branch_id' => $branchB->id,
+        'store_name' => 'Toko Global Harus Tetap Ada',
+    ])->assertRedirect();
+
+    $this->actingAs($user)->post(route('settings.update'), [
         'promotions' => [
-            ['id' => 2, 'title' => 'Promo Khusus B', 'description' => '', 'link' => '', 'active' => true],
+            ['id' => 1, 'title' => 'Promo Baru', 'description' => '', 'link' => '', 'active' => true],
         ],
     ])->assertRedirect();
 
     $settingService = app(\App\Services\SettingService::class);
     expect($settingService->getSettings()['store_name'])->toBe('Toko Global Harus Tetap Ada');
-    expect(collect($settingService->getSettings($branchA->id)['promotions'])->pluck('title'))->toContain('Promo Global');
+    expect(collect($settingService->getSettings()['promotions'])->pluck('title'))->toContain('Promo Baru');
 });

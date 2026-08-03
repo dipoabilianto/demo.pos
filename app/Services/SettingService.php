@@ -59,18 +59,8 @@ class SettingService
         'qris_manual_image' => null,
     ];
 
-    /**
-     * Settings keys that vary per branch instead of applying store-wide.
-     * A branch with no override for one of these keys falls back to the
-     * global value, same as the null-branch_id fallback used for
-     * Product/Voucher elsewhere in the app.
-     */
-    private const BRANCH_SCOPED_KEYS = ['promotions'];
-
     public function getSettings(?int $branchId = null): array
     {
-        $branchId ??= session('branch_id');
-
         $global = Cache::remember('app_settings', 300, function () {
             $rows = Setting::whereNull('branch_id')->get(['key', 'value']);
             if ($rows->isNotEmpty()) {
@@ -84,55 +74,21 @@ class SettingService
             return self::DEFAULTS;
         });
 
-        if ($branchId) {
-            $overrides = Cache::remember("app_settings_branch_{$branchId}", 300, function () use ($branchId) {
-                $rows = Setting::where('branch_id', $branchId)->whereIn('key', self::BRANCH_SCOPED_KEYS)->get(['key', 'value']);
-                $overrides = [];
-                foreach ($rows as $row) {
-                    $overrides[$row->key] = $row->value !== null ? (json_decode($row->value, true) ?? $row->value) : null;
-                }
-                return $overrides;
-            });
+        if ($branchId && isset($global['promotions'])) {
+            $global['promotions'] = array_values(array_filter($global['promotions'], function ($p) use ($branchId) {
+                $branchIds = $p['branch_ids'] ?? [];
 
-            $global = array_merge($global, $overrides);
+                return empty($branchIds) || in_array($branchId, $branchIds);
+            }));
         }
 
         return $global;
     }
 
-    /**
-     * The raw, un-merged value of a branch-scoped key for exactly one scope — global
-     * (branchId null) or one specific branch — with no fallback to the other. Used to
-     * populate an edit form so saving never silently forks an inherited value into an
-     * unintended per-branch override.
-     */
-    public function getRawScopedValue(string $key, ?int $branchId): mixed
+    public function saveSettings(array $settings): void
     {
-        $value = Setting::where('key', $key)->where('branch_id', $branchId)->value('value');
-
-        return $value !== null ? (json_decode($value, true) ?? $value) : null;
-    }
-
-    /**
-     * $branchId: omit (or pass `false`) to use the current session's branch, as before.
-     * Pass an explicit branch id to scope BRANCH_SCOPED_KEYS to that branch, or explicit
-     * `null` to save them globally (applies to every branch that has no override of its own).
-     */
-    public function saveSettings(array $settings, int|false|null $branchId = false): void
-    {
-        if ($branchId === false) {
-            $branchId = session('branch_id');
-        }
-
-        $branchScoped = $branchId ? array_intersect_key($settings, array_flip(self::BRANCH_SCOPED_KEYS)) : [];
-        $global = array_diff_key($settings, $branchScoped);
-
-        // Per-key upsert, not delete-then-reinsert: a save that targets a specific branch
-        // deliberately excludes BRANCH_SCOPED_KEYS (like 'promotions') from $global, so a
-        // blanket `whereNull('branch_id')->delete()` here would wipe out an unrelated
-        // global row (e.g. another branch's default promo) that this request never touched.
-        DB::transaction(function () use ($global) {
-            foreach ($global as $key => $value) {
+        DB::transaction(function () use ($settings) {
+            foreach ($settings as $key => $value) {
                 Setting::updateOrCreate(
                     ['key' => $key, 'branch_id' => null],
                     ['value' => is_array($value) ? json_encode($value) : (is_bool($value) ? ($value ? '1' : '0') : $value)]
@@ -140,16 +96,6 @@ class SettingService
             }
         });
         Cache::forget('app_settings');
-
-        if ($branchId && $branchScoped) {
-            foreach ($branchScoped as $key => $value) {
-                Setting::updateOrCreate(
-                    ['key' => $key, 'branch_id' => $branchId],
-                    ['value' => is_array($value) ? json_encode($value) : (is_bool($value) ? ($value ? '1' : '0') : $value)]
-                );
-            }
-            Cache::forget("app_settings_branch_{$branchId}");
-        }
     }
 
     public function getGeneralData(Request $request): array

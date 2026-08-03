@@ -8,12 +8,10 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Seeds one global promo (the owner's single default, shown on every branch
- * that has no override of its own) plus one branch-specific override, with
- * real banner images copied from database/seeders/images/promotions/ — so
- * the global/override promo behavior can be exercised end-to-end right after
- * a fresh seed instead of needing to be configured by hand first.
- * Run standalone with:
+ * Seeds 3 promos to demonstrate the per-promo branch targeting: one with no
+ * branch_ids (applies to every branch) and two each scoped to one specific
+ * branch, with real banner images copied from
+ * database/seeders/images/promotions/. Run standalone with:
  *   php artisan db:seed --class=PromotionSeeder
  */
 class PromotionSeeder extends Seeder
@@ -22,38 +20,46 @@ class PromotionSeeder extends Seeder
     {
         $settingService = app(SettingService::class);
 
-        $globalImage = $this->seedImage('promo-global-diskon.jpg', 'promotions/seed-global-diskon.jpg');
-        $branchImage = $this->seedImage('promo-branch-weekend.jpg', 'promotions/seed-branch-weekend.jpg');
+        $utama = Branch::where('slug', 'cabang-utama')->first();
+        $pulungKencana = Branch::where('slug', 'cabang-pulung-kencana')->first();
 
-        $settingService->saveSettings([
-            'promotions' => [
-                [
-                    'id' => 1,
-                    'title' => 'Diskon 20% Hari Ini',
-                    'description' => 'Berlaku untuk semua menu, semua cabang Oribun Bakery.',
-                    'link' => '',
-                    'image' => $globalImage,
-                    'active' => true,
-                ],
+        $promotions = [
+            [
+                'id' => 1,
+                'title' => 'Promo Weekend',
+                'description' => 'Diskon 20% untuk semua menu, akhir pekan ini saja.',
+                'link' => '',
+                'image' => $this->seedImage('promo-weekend.jpg', 'promotions/seed-promo-weekend.jpg'),
+                'active' => true,
+                'branch_ids' => [], // kosong = berlaku di semua cabang
             ],
-        ], null);
+        ];
 
-        $branch = Branch::where('slug', 'cabang-pulung-kencana')->first();
-
-        if ($branch) {
-            $settingService->saveSettings([
-                'promotions' => [
-                    [
-                        'id' => 2,
-                        'title' => 'Weekend Bundling Roti',
-                        'description' => 'Beli 3 roti pilihan, gratis 1 — khusus akhir pekan.',
-                        'link' => '',
-                        'image' => $branchImage,
-                        'active' => true,
-                    ],
-                ],
-            ], $branch->id);
+        if ($pulungKencana) {
+            $promotions[] = [
+                'id' => 2,
+                'title' => 'Promo Roti',
+                'description' => 'Beli 3 roti pilihan, gratis 1 — khusus cabang ini.',
+                'link' => '',
+                'image' => $this->seedImage('promo-roti.jpg', 'promotions/seed-promo-roti.jpg'),
+                'active' => true,
+                'branch_ids' => [$pulungKencana->id],
+            ];
         }
+
+        if ($utama) {
+            $promotions[] = [
+                'id' => 3,
+                'title' => 'Promo Kopi',
+                'description' => 'Beli 2 kopi, gratis 1 topping favorit — khusus cabang ini.',
+                'link' => '',
+                'image' => $this->seedImage('promo-kopi.jpg', 'promotions/seed-promo-kopi.jpg'),
+                'active' => true,
+                'branch_ids' => [$utama->id],
+            ];
+        }
+
+        $settingService->saveSettings(['promotions' => $promotions]);
     }
 
     private function seedImage(string $sourceFilename, string $storagePath): string

@@ -617,7 +617,12 @@
         @endif
 
         @if($user->hasPermission('settings.promotions') && $tab === 'promotions')
-        <div x-data="{ items: {!! htmlspecialchars(json_encode(old('promotions', $promotionsForTarget ?? [])), ENT_QUOTES, 'UTF-8') !!}, uploading: false, uploadPromoImage(event, item, i) { const file = event.target.files[0]; if (!file) return; this.uploading = true; const form = new FormData(); form.append('image', file); form.append('promo_id', item.id); form.append('promotions_branch_id', document.querySelector('input[name=\'promotions_branch_id\']').value); form.append('_token', document.querySelector('meta[name=\'csrf-token\']').content); fetch('{{ route('settings.upload-promo-image') }}', { method: 'POST', body: form }).then(r => r.json()).then(d => { if (d.success) { item.image = d.path; } this.uploading = false; }).catch(() => { this.uploading = false; }); } }">
+        @php
+            $promoItemsForForm = array_map(fn ($p) => array_merge($p, [
+                'branch_ids' => array_map('strval', $p['branch_ids'] ?? []),
+            ]), old('promotions', $settings['promotions'] ?? []));
+        @endphp
+        <div x-data="{ items: {!! htmlspecialchars(json_encode($promoItemsForForm), ENT_QUOTES, 'UTF-8') !!}, uploading: false, uploadPromoImage(event, item, i) { const file = event.target.files[0]; if (!file) return; this.uploading = true; const form = new FormData(); form.append('image', file); form.append('promo_id', item.id); form.append('_token', document.querySelector('meta[name=\'csrf-token\']').content); fetch('{{ route('settings.upload-promo-image') }}', { method: 'POST', body: form }).then(r => r.json()).then(d => { if (d.success) { item.image = d.path; } this.uploading = false; }).catch(() => { this.uploading = false; }); } }">
             <div class="rounded-2xl bg-white p-6 shadow-md shadow-warm-900/5 border border-warm-200/50 space-y-5">
                 <div class="flex items-center justify-between pb-4 border-b border-warm-100">
                     <div class="flex items-center gap-3">
@@ -626,29 +631,12 @@
                         </div>
                         <div>
                             <h3 class="text-base font-semibold text-warm-900">Slider Promosi</h3>
-                            <p class="text-xs text-warm-400">
-                                @if ($promotionsBranchId)
-                                    Promo khusus untuk cabang ini saja — cabang lain tidak terpengaruh.
-                                @else
-                                    Promo default untuk <strong>semua cabang</strong>. Cabang dengan promo sendiri (dipilih di kanan) akan memakai promonya sendiri, bukan yang ini.
-                                @endif
-                            </p>
+                            <p class="text-xs text-warm-400">Kelola slide promosi yang tampil di halaman toko online. Atur di cabang mana setiap promo tampil lewat centang cabang pada masing-masing slide.</p>
                         </div>
                     </div>
-                    <button @click="items.push({ id: Date.now(), title: '', description: '', link: '', active: true })" type="button" class="rounded-lg bg-theme-primary px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 transition-colors">
+                    <button @click="items.push({ id: Date.now(), title: '', description: '', link: '', active: true, branch_ids: [] })" type="button" class="rounded-lg bg-theme-primary px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 transition-colors">
                         + Tambah Slide
                     </button>
-                </div>
-
-                <div class="flex items-center gap-2 -mt-2">
-                    <label class="text-xs font-medium text-warm-700">Berlaku untuk:</label>
-                    <select onchange="location = '{{ request()->fullUrlWithQuery(['tab' => 'promotions']) }}&promotions_branch_id=' + this.value" class="rounded-lg border-warm-200 text-xs font-medium py-1.5 pl-2 pr-7 shadow-sm focus:border-theme-primary focus:ring-theme-primary/20 bg-white">
-                        <option value="" {{ $promotionsBranchId ? '' : 'selected' }}>Semua Cabang</option>
-                        @foreach ($branches as $b)
-                            <option value="{{ $b->id }}" {{ $promotionsBranchId === $b->id ? 'selected' : '' }}>Khusus: {{ $b->name }}</option>
-                        @endforeach
-                    </select>
-                    <input type="hidden" name="promotions_branch_id" value="{{ old('promotions_branch_id', $promotionsBranchId) }}">
                 </div>
 
                 <template x-for="(item, i) in items" :key="item.id">
@@ -691,6 +679,18 @@
                         <div>
                             <label class="block text-xs font-medium text-warm-700 mb-1">Deskripsi</label>
                             <textarea :name="`promotions[${i}][description]`" x-model="item.description" rows="2" class="block w-full rounded-lg border-warm-200 px-3 py-2 text-sm shadow-sm focus:border-theme-primary focus:ring-theme-primary/20 bg-white" placeholder="Deskripsi promosi..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-warm-700 mb-1">Berlaku di Cabang</label>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach ($branches as $b)
+                                <label class="flex items-center gap-1.5 cursor-pointer rounded-lg border border-warm-200 px-2.5 py-1.5 text-xs text-warm-700 hover:bg-warm-50">
+                                    <input type="checkbox" :name="`promotions[${i}][branch_ids][]`" value="{{ $b->id }}" x-model="item.branch_ids" class="rounded border-warm-300 text-theme-primary focus:ring-theme-primary/20">
+                                    {{ $b->name }}
+                                </label>
+                                @endforeach
+                            </div>
+                            <p class="text-[11px] text-warm-400 mt-1">Tidak ada yang dicentang = berlaku di semua cabang.</p>
                         </div>
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="hidden" :name="`promotions[${i}][active]`" value="0">
