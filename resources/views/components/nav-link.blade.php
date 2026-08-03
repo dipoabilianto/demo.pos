@@ -1,0 +1,33 @@
+@props(['active', 'icon', 'href'])
+
+@php
+$icons = [
+    'home' => '<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.5c0-3.5 2-7.5 7.5-7.5s7.5 4 7.5 7c0 .8-.3 1.5-1.2 2H5.7c-.9-.5-1.2-1.2-1.2-2z" /><path stroke-linecap="round" stroke-linejoin="round" d="M5.7 17.5c0 1.2 1.2 2.5 6.3 2.5s6.3-1.3 6.3-2.5" /><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 12l3-2.5 3 2.5" /><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.5v3h6v-3" />',
+    'croissant' => '<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 9c0-2 1.75-4.5 6.75-4.5s6.75 2.5 6.75 4.5" /><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 9L3.75 18c-.25 1 .75 2.25 2.25 2.25h12c1.5 0 2.5-1.25 2.25-2.25l-1.5-9" /><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 12l1.5 6M16.5 12l-1.5 6" />',
+    'cake' => '<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25l6.75-9 6.75 9" /><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 14.25h15v4.5c0 1.5-1.5 2.25-3 2.25h-9c-1.5 0-3-.75-3-2.25v-4.5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 14.25V21M12 14.25V21M15.75 14.25V21" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 5.25V3" />',
+    'cookie' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9z" /><circle cx="9" cy="9" r=".75" fill="currentColor" opacity="0.6" /><circle cx="15" cy="9" r=".75" fill="currentColor" opacity="0.6" /><circle cx="12" cy="7" r=".75" fill="currentColor" opacity="0.6" /><circle cx="8.25" cy="12.75" r=".75" fill="currentColor" opacity="0.6" /><circle cx="15.75" cy="12.75" r=".75" fill="currentColor" opacity="0.6" /><circle cx="10.5" cy="14.25" r=".75" fill="currentColor" opacity="0.6" /><circle cx="13.5" cy="14.25" r=".75" fill="currentColor" opacity="0.6" />',
+    'store' => '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9l-1.5 8.25c-.15.75.45 1.5 1.2 1.5h17.1c.75 0 1.35-.75 1.2-1.5L20.25 9" /><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9V6c0-1.5 1.5-3 3-3h10.5c1.5 0 3 1.5 3 3v3" /><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75h6" /><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15.75h7.5" />',
+    'clipboard' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 3.75H7.5c-.75 0-1.5.75-1.5 1.5v15c0 .75.75 1.5 1.5 1.5h9c.75 0 1.5-.75 1.5-1.5v-15c0-.75-.75-1.5-1.5-1.5H15" /><path stroke-linecap="round" stroke-linejoin="round" d="M9 3.75c0-.75.75-1.5 1.5-1.5h3c.75 0 1.5.75 1.5 1.5v0c0 .75-.75 1.5-1.5 1.5h-3c-.75 0-1.5-.75-1.5-1.5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75h4.5M9.75 12.75h4.5M9.75 15.75h4.5" />',
+    'cog' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281zM15 12a3 3 0 11-6 0 3 3 0 016 0z" />',
+    'payment' => '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />',
+    'receipt' => '<path stroke-linecap="round" stroke-linejoin="round" d="M6.72 14.25l.75-.75c.418-.418.418-1.082 0-1.5l-.75-.75m4.5 0l-.75.75a1.056 1.056 0 000 1.5l.75.75M9 9.75l-2.25 2.25M15 9.75l2.25 2.25M9 14.25l-2.25 2.25M15 14.25l2.25 2.25" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.75H7.5a3 3 0 00-3 3v10.5a3 3 0 003 3h9a3 3 0 003-3V6.75a3 3 0 00-3-3z" />',
+    'package' => '<path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />',
+    'scale' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v9m-6.364-.636l12.728 0M4.5 21h15" /><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12.75l1.5-9h7.5l1.5 9" />',
+    'ticket' => '<path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-6-1.5H6" /><path stroke-linecap="round" stroke-linejoin="round" d="M18 14.25c0-.75.75-1.5 1.5-1.5s1.5.75 1.5 1.5v2.25c0 .75-.75 1.5-1.5 1.5H6.75c-.75 0-1.5-.75-1.5-1.5V9.75c0-.75.75-1.5 1.5-1.5h11.25c.75 0 1.5.75 1.5 1.5v.75" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 15.75V6.75c0-.75.75-1.5 1.5-1.5h13.5c.75 0 1.5.75 1.5 1.5v4.5" />',
+    'chart' => '<path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />',
+];
+
+$classes = $active ?? false
+    ? 'sidebar-link-active group flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium'
+    : 'sidebar-link group flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium';
+@endphp
+
+<a href="{{ $href }}" class="{{ $classes }}">
+    <svg class="h-5 w-5 shrink-0 {{ $active ? 'text-theme-primary' : '' }}" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        {!! $icons[$icon] !!}
+    </svg>
+    {{ $slot }}
+    @if ($active ?? false)
+        <span class="ml-auto h-1.5 w-1.5 rounded-full bg-theme-primary shadow-sm shadow-theme-shadow"></span>
+    @endif
+</a>

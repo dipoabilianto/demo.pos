@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" fill="none">
+  <rect width="120" height="40" rx="6" fill="#FFCC00"/>
+  <rect width="120" height="40" rx="6" fill="url(#g)"/>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="120" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFCC00"/>
+      <stop offset="1" stop-color="#FFB800"/>
+    </linearGradient>
+  </defs>
+  <text x="60" y="26" font-family="Arial, sans-serif" font-weight="bold" font-size="16" fill="#1F2937" text-anchor="middle">QRIS</text>
+</svg>

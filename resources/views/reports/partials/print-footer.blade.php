@@ -1,0 +1,1 @@
+{{-- Kosong — footer sudah di layout print.blade.php --}}
