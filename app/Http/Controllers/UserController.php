@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -14,7 +15,13 @@ class UserController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = User::with('roles');
+        $authUser = $request->user();
+        $allowedTabs = [];
+        if ($authUser->hasPermission('users.view')) $allowedTabs[] = 'users';
+        if ($authUser->hasPermission('roles.view')) $allowedTabs[] = 'roles';
+        $tab = in_array($request->query('tab', 'users'), $allowedTabs) ? $request->query('tab', 'users') : $allowedTabs[0];
+
+        $query = User::with('roles', 'branch');
 
         if ($search = $request->search) {
             $query->where(function ($q) use ($search) {
@@ -24,11 +31,13 @@ class UserController extends Controller
             });
         }
 
-        $users = $query->latest()->paginate(15);
+        $users = $query->latest()->paginate(15)->withQueryString();
         $allRoles = Role::all();
+        $roles = Role::withCount('users')->get();
         $permissionModules = config('permissions.modules');
+        $branches = Branch::active()->orderBy('name')->get();
 
-        return view('settings.users', compact('users', 'allRoles', 'permissionModules'));
+        return view('settings.users', compact('tab', 'allowedTabs', 'users', 'allRoles', 'roles', 'permissionModules', 'branches'));
     }
 
     public function store(Request $request): RedirectResponse

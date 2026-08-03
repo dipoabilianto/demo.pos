@@ -231,7 +231,7 @@ test('security route is superadmin only', function () {
 
     $superadmin = User::where('email', 'superadmin@oribun.app')->first();
     $response = $this->actingAs($superadmin)->get('/settings/payment-methods');
-    $response->assertStatus(200);
+    $response->assertRedirect(route('settings.general', ['tab' => 'payment']));
 });
 
 test('multi-role user can access combined routes', function () {

@@ -49,28 +49,23 @@
 
         @if ($isTopLevel)
         <nav class="flex-1 space-y-0.5">
-            <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')" icon="home">
-                Dashboard
-            </x-nav-link>
-            @if ($u && ($u->isOwner() || $u->isSuperadmin()))
-                <x-nav-link href="{{ route('owner.dashboard') }}" :active="request()->routeIs('owner.dashboard')" icon="chart">
-                    Owner Dashboard
-                </x-nav-link>
-            @endif
             @if ($u?->hasPermission('orders.create'))
                 <x-nav-link href="{{ route('orders.catalog') }}" :active="request()->routeIs('orders.catalog') || request()->routeIs('orders.checkout')" icon="cake">
                     Transaksi Baru
                 </x-nav-link>
             @endif
+            @if ($u && ($u->isOwner() || $u->isSuperadmin()))
+                <x-nav-link href="{{ route('owner.dashboard') }}" :active="request()->routeIs('owner.dashboard')" icon="chart">
+                    Owner Dashboard
+                </x-nav-link>
+            @endif
+            <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')" icon="home">
+                Dashboard
+            </x-nav-link>
             @if ($u?->hasPermission('orders.view'))
                 <x-nav-link href="{{ route('orders.history') }}" :active="request()->routeIs('orders.history') || request()->routeIs('orders.show')" icon="clipboard">
                     Riwayat Pesanan
                     <span id="order-badge" class="ml-auto hidden h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white ring-2 ring-red-300">0</span>
-                </x-nav-link>
-            @endif
-            @if ($u?->canAttendance())
-                <x-nav-link href="{{ route('attendances.index') }}" :active="request()->routeIs('attendances.*')" icon="clipboard">
-                    Absensi
                 </x-nav-link>
             @endif
             @if ($u?->hasPermission('products.view'))
@@ -91,6 +86,11 @@
             @if ($u?->hasPermission('reports.view'))
                 <x-nav-link href="{{ route('reports.index') }}" :active="request()->routeIs('reports.*')" icon="chart">
                     Laporan
+                </x-nav-link>
+            @endif
+            @if ($u?->canAttendance())
+                <x-nav-link href="{{ route('attendances.index') }}" :active="request()->routeIs('attendances.*')" icon="clipboard">
+                    Absensi
                 </x-nav-link>
             @endif
         </nav>
@@ -98,28 +98,23 @@
         @else
         {{-- Flat: admin & below --}}
         <nav class="flex-1 space-y-0.5">
-            <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')" icon="home">
-                Dashboard
-            </x-nav-link>
-            @if ($u?->hasPermission('products.view'))
-                <x-nav-link href="{{ route('products.index') }}" :active="request()->routeIs('products.*')" icon="croissant">
-                    Produk
-                </x-nav-link>
-            @endif
             @if ($u?->hasPermission('orders.create'))
                 <x-nav-link href="{{ route('orders.catalog') }}" :active="request()->routeIs('orders.catalog') || request()->routeIs('orders.checkout')" icon="cake">
                     Transaksi Baru
                 </x-nav-link>
             @endif
+            <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')" icon="home">
+                Dashboard
+            </x-nav-link>
             @if ($u?->hasPermission('orders.view'))
                 <x-nav-link href="{{ route('orders.history') }}" :active="request()->routeIs('orders.history') || request()->routeIs('orders.show')" icon="clipboard">
                     Riwayat Pesanan
                     <span id="order-badge" class="ml-auto hidden h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white ring-2 ring-red-300">0</span>
                 </x-nav-link>
             @endif
-            @if ($u?->hasPermission('expenses.view'))
-                <x-nav-link href="{{ route('expenses.index') }}" :active="request()->routeIs('expenses.*')" icon="cookie">
-                    Pengeluaran
+            @if ($u?->hasPermission('products.view'))
+                <x-nav-link href="{{ route('products.index') }}" :active="request()->routeIs('products.*')" icon="croissant">
+                    Produk
                 </x-nav-link>
             @endif
             @if ($u?->hasPermission('raw-materials.view') || $u?->hasPermission('stock-opname.view'))
@@ -127,14 +122,19 @@
                     Bahan Baku
                 </x-nav-link>
             @endif
-            @if ($u?->canAttendance())
-                <x-nav-link href="{{ route('attendances.index') }}" :active="request()->routeIs('attendances.*')" icon="clipboard">
-                    Absensi
+            @if ($u?->hasPermission('expenses.view'))
+                <x-nav-link href="{{ route('expenses.index') }}" :active="request()->routeIs('expenses.*')" icon="cookie">
+                    Pengeluaran
                 </x-nav-link>
             @endif
             @if ($u?->hasPermission('reports.view'))
                 <x-nav-link href="{{ route('reports.index') }}" :active="request()->routeIs('reports.*')" icon="chart">
                     Laporan
+                </x-nav-link>
+            @endif
+            @if ($u?->canAttendance())
+                <x-nav-link href="{{ route('attendances.index') }}" :active="request()->routeIs('attendances.*')" icon="clipboard">
+                    Absensi
                 </x-nav-link>
             @endif
         </nav>
@@ -147,18 +147,18 @@
         <p class="sidebar-section-label px-3 text-xs font-semibold uppercase tracking-widest mb-1">Pengaturan</p>
         <div class="space-y-0.5 pb-2">
             @if ($u?->hasPermission('settings.view') || $u?->hasPermission('users.view') || $u?->hasPermission('roles.view') || $u?->hasPermission('shifts.view'))
-                <x-nav-link href="{{ route('settings.general') }}" :active="request()->routeIs('settings.*') && !request()->routeIs('settings.cabang*') && !request()->routeIs('settings.payment-methods.*')" icon="cog">
+                <x-nav-link href="{{ route('settings.general') }}" :active="request()->routeIs('settings.*') && !request()->routeIs('settings.cabang*') && !request()->routeIs('settings.payment-methods.*') && !request()->routeIs('settings.users.*') && !request()->routeIs('settings.roles.*')" icon="cog">
                     Pengaturan
+                </x-nav-link>
+            @endif
+            @if ($u?->hasPermission('users.view') || $u?->hasPermission('roles.view'))
+                <x-nav-link href="{{ route('settings.users.index') }}" :active="request()->routeIs('settings.users.*') || request()->routeIs('settings.roles.*')" icon="users">
+                    Pengguna & Role
                 </x-nav-link>
             @endif
             @if ($u?->hasPermission('branches.view'))
                 <x-nav-link href="{{ route('settings.cabang') }}" :active="request()->routeIs('settings.cabang*')" icon="store">
                     Cabang & Tipe Bisnis
-                </x-nav-link>
-            @endif
-            @if ($u?->hasPermission('payment-methods.view'))
-                <x-nav-link href="{{ route('settings.payment-methods.index') }}" :active="request()->routeIs('settings.payment-methods.*')" icon="payment">
-                    Metode Pembayaran
                 </x-nav-link>
             @endif
         </div>

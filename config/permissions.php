@@ -117,6 +117,16 @@ return [
             ],
         ],
         [
+            'key' => 'roles',
+            'label' => 'Role & Hak Akses',
+            'permissions' => [
+                ['key' => 'roles.view', 'label' => 'Lihat Role'],
+                ['key' => 'roles.create', 'label' => 'Tambah Role'],
+                ['key' => 'roles.edit', 'label' => 'Edit Role'],
+                ['key' => 'roles.delete', 'label' => 'Hapus Role'],
+            ],
+        ],
+        [
             'key' => 'settings',
             'label' => 'Pengaturan',
             'permissions' => [
@@ -159,6 +169,14 @@ return [
                 ['key' => 'security.manage', 'label' => 'Kelola Keamanan (2FA)'],
             ],
         ],
+        [
+            'key' => 'attendances',
+            'label' => 'Absensi',
+            'permissions' => [
+                ['key' => 'attendances.check-in', 'label' => 'Absen Masuk/Pulang'],
+                ['key' => 'attendances.report', 'label' => 'Lihat Laporan Absensi'],
+            ],
+        ],
     ],
 
     /*
@@ -183,9 +201,11 @@ return [
             'stock-opname.*',
             'vouchers.*',
             'users.*',
+            'roles.*',
             'settings.*',
             'payment-methods.*',
             'reports.*',
+            'attendances.*',
         ],
         'kasir' => [
             'dashboard.*',
@@ -193,11 +213,13 @@ return [
             'sales.*',
             'payments.*',
             'receipts.*',
+            'attendances.check-in',
         ],
         'produksi' => [
             'dashboard.*',
             'products.*',
             'categories.*',
+            'attendances.check-in',
         ],
         'gudang' => [
             'dashboard.*',
@@ -210,6 +232,7 @@ return [
             'reports.raw-materials',
             'reports.stock',
             'reports.stock-opname',
+            'attendances.check-in',
         ],
         'owner' => [
             'dashboard.*',
@@ -219,6 +242,7 @@ return [
             'reports.*',
             'settings.*',
             'payment-methods.*',
+            'attendances.*',
         ],
         'superadmin' => [], // superadmin bypasses all checks
     ],

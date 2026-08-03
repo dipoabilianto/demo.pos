@@ -9,9 +9,9 @@ use Illuminate\Validation\Rule;
 
 class RoleController extends Controller
 {
-    public function index(): \Illuminate\Http\RedirectResponse
+    public function index(): RedirectResponse
     {
-        return redirect()->route('settings.general', ['tab' => 'roles']);
+        return redirect()->route('settings.users.index', ['tab' => 'roles']);
     }
 
     private function validPermissionKeys(): array

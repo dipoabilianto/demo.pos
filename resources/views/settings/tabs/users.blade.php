@@ -1,3 +1,12 @@
+@php
+    $roleColors = [
+        'superadmin' => ['bg' => 'bg-rose-100', 'text' => 'text-rose-700', 'ring' => 'ring-rose-200', 'dot' => 'bg-rose-400'],
+        'admin' => ['bg' => 'bg-purple-100', 'text' => 'text-purple-700', 'ring' => 'ring-purple-200', 'dot' => 'bg-purple-400'],
+        'kasir' => ['bg' => 'bg-emerald-100', 'text' => 'text-emerald-700', 'ring' => 'ring-emerald-200', 'dot' => 'bg-emerald-400'],
+        'produksi' => ['bg' => 'bg-theme-primary/10', 'text' => 'text-theme-primary', 'ring' => 'ring-theme-primary/20', 'dot' => 'bg-theme-primary'],
+        'gudang' => ['bg' => 'bg-sky-100', 'text' => 'text-sky-700', 'ring' => 'ring-sky-200', 'dot' => 'bg-sky-400'],
+    ];
+@endphp
 <div class="space-y-6 p-6">
     <div class="flex items-center justify-between pb-4 border-b border-warm-100">
         <div class="flex items-center gap-3">
@@ -20,7 +29,7 @@
     <div class="bg-white rounded-2xl shadow-md shadow-warm-900/5 ring-1 ring-warm-200/50 overflow-hidden">
         <div class="p-4 border-b border-warm-100">
             <form method="GET">
-                <input type="hidden" name="tab" value="manajemen">
+                <input type="hidden" name="tab" value="users">
                 <input type="search" name="search" value="{{ request('search') }}" placeholder="Cari nama, email, atau peran..." inputmode="search" class="block w-full max-w-sm rounded-xl border-warm-200 px-4 py-2.5 text-sm shadow-sm focus:border-theme-primary focus:ring-theme-primary/20 bg-white">
             </form>
         </div>

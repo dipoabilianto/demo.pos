@@ -5,14 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\PaymentMethod;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 
 class PaymentMethodController extends Controller
 {
-    public function index(): View
+    public function index(): RedirectResponse
     {
-        $methods = PaymentMethod::orderBy('group')->orderBy('name')->get();
-        return view('settings.payment-methods', compact('methods'));
+        return redirect()->route('settings.general', ['tab' => 'payment']);
     }
 
     public function toggle(Request $request, PaymentMethod $paymentMethod): RedirectResponse
@@ -20,6 +18,6 @@ class PaymentMethodController extends Controller
         $paymentMethod->update(['is_active' => !$paymentMethod->is_active]);
 
         $status = $paymentMethod->is_active ? 'diaktifkan' : 'dinonaktifkan';
-        return redirect()->route('settings.payment-methods.index')->with('success', "Metode pembayaran {$paymentMethod->name} berhasil {$status}.");
+        return redirect()->route('settings.general', ['tab' => 'payment'])->with('success', "Metode pembayaran {$paymentMethod->name} berhasil {$status}.");
     }
 }

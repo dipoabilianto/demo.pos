@@ -19,8 +19,9 @@ class SettingsController extends Controller
         $settings = $this->getSettings();
         $tab = $request->tab ?? 'general';
         $branches = \App\Models\Branch::active()->orderBy('name')->get(['id', 'name']);
+        $paymentMethods = \App\Models\PaymentMethod::orderBy('group')->orderBy('name')->get();
 
-        return view('settings.general', compact('settings', 'tab', 'branches'));
+        return view('settings.general', compact('settings', 'tab', 'branches', 'paymentMethods'));
     }
 
     public function uploadLogo(Request $request)

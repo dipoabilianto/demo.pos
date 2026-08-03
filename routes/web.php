@@ -216,7 +216,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('vouchers/{voucher}', [VoucherController::class, 'destroy'])->name('vouchers.destroy')->middleware('role:permission:vouchers.delete');
 
     Route::prefix('users')->name('settings.users.')->group(function () {
-        Route::get('/', [UserController::class, 'index'])->name('index')->middleware('role:permission:users.view');
+        Route::get('/', [UserController::class, 'index'])->name('index')->middleware('role:permission:users.view,permission:roles.view');
         Route::post('/', [UserController::class, 'store'])->name('store')->middleware('role:permission:users.create');
         Route::patch('/{user}', [UserController::class, 'update'])->name('update')->middleware('role:permission:users.edit');
         Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy')->middleware('role:permission:users.delete');

@@ -21,10 +21,6 @@ trait HasPermissions
 
     public function canAttendance(): bool
     {
-        if ($this->isSuperadmin()) {
-            return false;
-        }
-
         return $this->hasPermission('attendances.check-in');
     }
 
