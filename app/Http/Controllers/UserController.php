@@ -49,6 +49,7 @@ class UserController extends Controller
             'roles' => 'required|array|min:1',
             'roles.*' => 'exists:roles,id',
             'permissions' => 'nullable|array',
+            'branch_id' => 'nullable|exists:branches,id',
         ]);
 
         $authUser = $request->user();
@@ -67,6 +68,7 @@ class UserController extends Controller
             'password' => Hash::make($validated['password']),
             'role' => $firstRole?->name ?? 'kasir',
             'permissions' => !empty($validated['permissions']) ? $validated['permissions'] : null,
+            'branch_id' => $validated['branch_id'] ?? null,
         ]);
 
         $user->roles()->attach($validated['roles']);
@@ -83,6 +85,7 @@ class UserController extends Controller
             'roles' => 'required|array|min:1',
             'roles.*' => 'exists:roles,id',
             'permissions' => 'nullable|array',
+            'branch_id' => 'nullable|exists:branches,id',
         ]);
 
         $authUser = $request->user();
@@ -100,6 +103,7 @@ class UserController extends Controller
             'email' => $validated['email'],
             'role' => $firstRole?->name ?? 'kasir',
             'permissions' => !empty($validated['permissions']) ? $validated['permissions'] : null,
+            'branch_id' => $validated['branch_id'] ?? null,
         ];
 
         if (!empty($validated['password'])) {
