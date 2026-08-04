@@ -52,7 +52,7 @@ class ShiftController extends Controller
 
         Shift::create($validated);
 
-        return redirect()->route('shifts.index')->with('success', 'Shift berhasil ditambahkan.');
+        return redirect()->route('settings.shifts.index')->with('success', 'Shift berhasil ditambahkan.');
     }
 
     private function assertShiftBranchAccess(Shift $shift): void
@@ -89,7 +89,7 @@ class ShiftController extends Controller
 
         $shift->update($validated);
 
-        return redirect()->route('shifts.index')->with('success', 'Shift berhasil diperbarui.');
+        return redirect()->route('settings.shifts.index')->with('success', 'Shift berhasil diperbarui.');
     }
 
     public function destroy(Shift $shift): RedirectResponse
@@ -99,7 +99,7 @@ class ShiftController extends Controller
         $shift->schedules()->delete();
         $shift->delete();
 
-        return redirect()->route('shifts.index')->with('success', 'Shift berhasil dihapus.');
+        return redirect()->route('settings.shifts.index')->with('success', 'Shift berhasil dihapus.');
     }
 
     public function scheduleStore(Request $request): RedirectResponse
@@ -119,7 +119,7 @@ class ShiftController extends Controller
 
         ShiftUser::create($validated);
 
-        return redirect()->route('shifts.index')->with('success', 'Jadwal berhasil ditambahkan.');
+        return redirect()->route('settings.shifts.index')->with('success', 'Jadwal berhasil ditambahkan.');
     }
 
     public function scheduleDestroy(ShiftUser $schedule): RedirectResponse
@@ -128,6 +128,6 @@ class ShiftController extends Controller
 
         $schedule->delete();
 
-        return redirect()->route('shifts.index')->with('success', 'Jadwal berhasil dihapus.');
+        return redirect()->route('settings.shifts.index')->with('success', 'Jadwal berhasil dihapus.');
     }
 }

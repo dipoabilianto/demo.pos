@@ -21,7 +21,16 @@ class SettingsController extends Controller
         $branches = \App\Models\Branch::active()->orderBy('name')->get(['id', 'name']);
         $paymentMethods = \App\Models\PaymentMethod::orderBy('group')->orderBy('name')->get();
 
-        return view('settings.general', compact('settings', 'tab', 'branches', 'paymentMethods'));
+        $shiftBranches = null;
+        $dayNames = null;
+        if ($tab === 'shifts' && $request->user()?->hasPermission('shifts.view')) {
+            $shiftBranches = $request->user()->isSuperadmin()
+                ? \App\Models\Branch::with('shifts.schedules.user', 'users')->get()
+                : \App\Models\Branch::where('id', session('branch_id'))->with('shifts.schedules.user', 'users')->get();
+            $dayNames = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+        }
+
+        return view('settings.general', compact('settings', 'tab', 'branches', 'paymentMethods', 'shiftBranches', 'dayNames'));
     }
 
     public function uploadLogo(Request $request)

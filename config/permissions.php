@@ -177,6 +177,15 @@ return [
                 ['key' => 'attendances.report', 'label' => 'Lihat Laporan Absensi'],
             ],
         ],
+        [
+            'key' => 'shifts',
+            'label' => 'Shift',
+            'permissions' => [
+                ['key' => 'shifts.view', 'label' => 'Lihat Shift'],
+                ['key' => 'shifts.create', 'label' => 'Tambah Shift'],
+                ['key' => 'shifts.edit', 'label' => 'Edit/Hapus Shift'],
+            ],
+        ],
     ],
 
     /*
@@ -206,6 +215,7 @@ return [
             'payment-methods.*',
             'reports.*',
             'attendances.*',
+            'shifts.*',
         ],
         'kasir' => [
             'dashboard.*',
@@ -243,6 +253,7 @@ return [
             'settings.*',
             'payment-methods.*',
             'attendances.*',
+            'shifts.*',
         ],
         'superadmin' => [], // superadmin bypasses all checks
     ],
