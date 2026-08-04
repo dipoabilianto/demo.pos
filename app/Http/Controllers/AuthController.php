@@ -77,7 +77,7 @@ class AuthController extends Controller
     public function verifyCaptcha(Request $request): RedirectResponse
     {
         $request->validate([
-            'captcha' => 'required|numeric',
+            'captcha' => 'required|string|max:5',
         ]);
 
         $userId = session('captcha:user_id');
@@ -88,10 +88,10 @@ class AuthController extends Controller
 
         $expected = $request->session()->pull('captcha_answer');
 
-        if (! $expected || (int) $request->captcha !== $expected) {
+        if (! $expected || strtoupper($request->captcha) !== $expected) {
             $this->generateCaptcha();
 
-            return back()->withErrors(['captcha' => 'Jawaban captcha salah.']);
+            return back()->withErrors(['captcha' => 'Kode verifikasi salah.']);
         }
 
         $user = User::find($userId);
@@ -204,17 +204,15 @@ class AuthController extends Controller
 
     private function generateCaptcha(): void
     {
-        $a = random_int(10, 99);
-        $b = random_int(10, 99);
-        $op = random_int(0, 1) === 0 ? '+' : '-';
+        // Excludes 0/O, 1/I/L and other easily-confused characters.
+        $chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 
-        $answer = $op === '+' ? $a + $b : $a - $b;
-        if ($answer < 0) {
-            $a += $b;
-            $answer = $a - $b;
+        $code = '';
+        for ($i = 0; $i < 5; $i++) {
+            $code .= $chars[random_int(0, strlen($chars) - 1)];
         }
 
-        session()->put('captcha_answer', $answer);
-        session()->put('captcha_question', "$a $op $b");
+        session()->put('captcha_answer', $code);
+        session()->put('captcha_question', $code);
     }
 }

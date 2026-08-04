@@ -71,22 +71,21 @@
 
                 <div class="rounded-2xl bg-white p-8 ring-1 ring-stone-100 shadow-xl shadow-stone-200/50">
                     <h2 class="text-xl font-bold text-stone-900">Verifikasi Keamanan</h2>
-                    <p class="text-sm text-stone-500 mb-6">Jawab soal berikut untuk melanjutkan login</p>
+                    <p class="text-sm text-stone-500 mb-6">Masukkan kode yang tertera di bawah ini untuk melanjutkan login</p>
 
                     <form method="POST" action="{{ route('login.captcha.verify') }}" class="space-y-5">
                         @csrf
                         <div>
-                            <label class="block text-sm font-medium text-stone-700 mb-1.5">Verifikasi Keamanan</label>
-                            <div class="flex items-center gap-3">
-                                <div class="flex items-center gap-2 rounded-xl bg-warm-100 px-4 py-2.5 text-sm font-bold text-warm-700 select-none">
-                                    <svg class="h-4 w-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" /></svg>
-                                    <span>{{ session('captcha_question', '5 + 3') }}</span>
-                                </div>
-                                <span class="text-sm text-stone-400">=</span>
-                                <input type="text" name="captcha" inputmode="numeric" autocomplete="off" maxlength="4" required
-                                    class="block w-20 text-center rounded-xl border-stone-300 px-3 py-2.5 text-sm text-stone-900 placeholder-stone-400 focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 transition-all"
-                                    placeholder="?">
+                            <label class="block text-sm font-medium text-stone-700 mb-1.5">Kode Verifikasi</label>
+                            <div class="flex items-center justify-center gap-2 rounded-xl bg-warm-100 px-4 py-3 mb-3 select-none">
+                                @foreach (str_split(session('captcha_question', 'A2B3C')) as $char)
+                                    <span class="text-2xl font-bold tracking-wider text-warm-700" style="transform: rotate({{ random_int(-12, 12) }}deg); display: inline-block;">{{ $char }}</span>
+                                @endforeach
                             </div>
+                            <input type="text" name="captcha" autocomplete="off" autocapitalize="characters" maxlength="5" required
+                                oninput="this.value = this.value.toUpperCase()"
+                                class="block w-full text-center rounded-xl border-stone-300 px-3 py-2.5 text-lg font-bold tracking-[0.3em] uppercase text-stone-900 placeholder-stone-400 focus:border-theme-primary focus:ring-2 focus:ring-theme-primary/20 transition-all"
+                                placeholder="-----">
                             @error('captcha')
                                 <p class="mt-1 text-sm text-rose-600">{{ $message }}</p>
                             @enderror
