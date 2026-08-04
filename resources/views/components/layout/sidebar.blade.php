@@ -1,12 +1,15 @@
 @php use App\Services\SettingService; $storeSettings = app(SettingService::class)->getSettings(); @endphp
 
-<nav x-cloak class="flex flex-col shrink-0 overflow-x-hidden
+<nav x-cloak x-show="sidebarOpen"
+     x-transition:enter="transition-transform duration-300 ease-out"
+     x-transition:enter-start="-translate-x-full"
+     x-transition:enter-end="translate-x-0"
+     x-transition:leave="transition-transform duration-300 ease-in"
+     x-transition:leave-start="translate-x-0"
+     x-transition:leave-end="-translate-x-full"
+     class="flex flex-col shrink-0 overflow-x-hidden
             fixed inset-y-0 left-0 z-50 lg:relative lg:z-0
-            max-lg:w-72 lg:w-72
-            max-lg:transition-transform max-lg:duration-300"
-     :class="sidebarOpen
-                ? 'translate-x-0'
-                : '-translate-x-full'"
+            w-72"
      @click="isMobile && $event.target.closest('a[href]') && (sidebarOpen = false)"
      style="background: linear-gradient(to bottom, var(--theme-sidebar), color-mix(in srgb, var(--theme-sidebar) 70%, #020617));">
 
