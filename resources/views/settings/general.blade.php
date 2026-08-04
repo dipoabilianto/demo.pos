@@ -18,9 +18,9 @@
     $tab = in_array(request('tab', 'general'), $allowedTabs) ? request('tab', 'general') : $allowedTabs[0];
 @endphp
 <div>
-    <div class="mb-6 flex gap-1 rounded-xl bg-white p-1.5 shadow-sm border border-warm-200/50 w-fit">
+    <div class="mb-6 flex gap-1 overflow-x-auto rounded-xl bg-white p-1.5 shadow-sm border border-warm-200/50 max-w-full lg:w-fit">
         @if($user->hasPermission('settings.general'))
-        <a href="{{ request()->fullUrlWithQuery(['tab' => 'general']) }}" class="rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 {{ $tab === 'general' ? 'bg-theme-primary text-white shadow-sm' : 'text-warm-600 hover:bg-warm-100' }}">
+        <a href="{{ request()->fullUrlWithQuery(['tab' => 'general']) }}" class="shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 {{ $tab === 'general' ? 'bg-theme-primary text-white shadow-sm' : 'text-warm-600 hover:bg-warm-100' }}">
             <div class="flex items-center gap-2">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72" /></svg>
                 Toko
@@ -28,7 +28,7 @@
         </a>
         @endif
         @if($user->hasPermission('settings.payment'))
-        <a href="{{ request()->fullUrlWithQuery(['tab' => 'payment']) }}" class="rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 {{ $tab === 'payment' ? 'bg-theme-primary text-white shadow-sm' : 'text-warm-600 hover:bg-warm-100' }}">
+        <a href="{{ request()->fullUrlWithQuery(['tab' => 'payment']) }}" class="shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 {{ $tab === 'payment' ? 'bg-theme-primary text-white shadow-sm' : 'text-warm-600 hover:bg-warm-100' }}">
             <div class="flex items-center gap-2">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" /></svg>
                 Pembayaran
@@ -36,7 +36,7 @@
         </a>
         @endif
         @if($user->hasPermission('settings.tax'))
-        <a href="{{ request()->fullUrlWithQuery(['tab' => 'tax']) }}" class="rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 {{ $tab === 'tax' ? 'bg-theme-primary text-white shadow-sm' : 'text-warm-600 hover:bg-warm-100' }}">
+        <a href="{{ request()->fullUrlWithQuery(['tab' => 'tax']) }}" class="shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 {{ $tab === 'tax' ? 'bg-theme-primary text-white shadow-sm' : 'text-warm-600 hover:bg-warm-100' }}">
             <div class="flex items-center gap-2">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
                 Pajak
@@ -44,7 +44,7 @@
         </a>
         @endif
         @if($user->hasPermission('settings.notifications'))
-        <a href="{{ request()->fullUrlWithQuery(['tab' => 'notifications']) }}" class="rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 {{ $tab === 'notifications' ? 'bg-theme-primary text-white shadow-sm' : 'text-warm-600 hover:bg-warm-100' }}">
+        <a href="{{ request()->fullUrlWithQuery(['tab' => 'notifications']) }}" class="shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 {{ $tab === 'notifications' ? 'bg-theme-primary text-white shadow-sm' : 'text-warm-600 hover:bg-warm-100' }}">
             <div class="flex items-center gap-2">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
                 Notifikasi
@@ -52,7 +52,7 @@
         </a>
         @endif
         @if($user->hasPermission('settings.receipt'))
-        <a href="{{ request()->fullUrlWithQuery(['tab' => 'receipt']) }}" class="rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 {{ $tab === 'receipt' ? 'bg-theme-primary text-white shadow-sm' : 'text-warm-600 hover:bg-warm-100' }}">
+        <a href="{{ request()->fullUrlWithQuery(['tab' => 'receipt']) }}" class="shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 {{ $tab === 'receipt' ? 'bg-theme-primary text-white shadow-sm' : 'text-warm-600 hover:bg-warm-100' }}">
             <div class="flex items-center gap-2">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 14.25l.75-.75c.418-.418.418-1.082 0-1.5l-.75-.75m4.5 0l-.75.75a1.056 1.056 0 000 1.5l.75.75M9 9.75l-2.25 2.25M15 9.75l2.25 2.25M9 14.25l-2.25 2.25M15 14.25l2.25 2.25" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.75H7.5a3 3 0 00-3 3v10.5a3 3 0 003 3h9a3 3 0 003-3V6.75a3 3 0 00-3-3z" /></svg>
                 Struk
@@ -60,7 +60,7 @@
         </a>
         @endif
         @if($user->hasPermission('settings.promotions'))
-        <a href="{{ request()->fullUrlWithQuery(['tab' => 'promotions']) }}" class="rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 {{ $tab === 'promotions' ? 'bg-theme-primary text-white shadow-sm' : 'text-warm-600 hover:bg-warm-100' }}">
+        <a href="{{ request()->fullUrlWithQuery(['tab' => 'promotions']) }}" class="shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 {{ $tab === 'promotions' ? 'bg-theme-primary text-white shadow-sm' : 'text-warm-600 hover:bg-warm-100' }}">
             <div class="flex items-center gap-2">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" /></svg>
                 Promosi
@@ -68,7 +68,7 @@
         </a>
         @endif
         @if ($user->hasPermission('security.manage'))
-        <a href="{{ request()->fullUrlWithQuery(['tab' => 'security']) }}" class="rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 {{ $tab === 'security' ? 'bg-emerald-500 text-white shadow-sm' : 'text-warm-600 hover:bg-warm-100' }}">
+        <a href="{{ request()->fullUrlWithQuery(['tab' => 'security']) }}" class="shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 {{ $tab === 'security' ? 'bg-emerald-500 text-white shadow-sm' : 'text-warm-600 hover:bg-warm-100' }}">
             <div class="flex items-center gap-2">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
                 Keamanan
@@ -76,7 +76,7 @@
         </a>
         @endif
         @if($user->hasPermission('settings.appearance'))
-        <a href="{{ request()->fullUrlWithQuery(['tab' => 'appearance']) }}" class="rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 {{ $tab === 'appearance' ? 'bg-theme-primary text-white shadow-sm' : 'text-warm-600 hover:bg-warm-100' }}">
+        <a href="{{ request()->fullUrlWithQuery(['tab' => 'appearance']) }}" class="shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 {{ $tab === 'appearance' ? 'bg-theme-primary text-white shadow-sm' : 'text-warm-600 hover:bg-warm-100' }}">
             <div class="flex items-center gap-2">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" /></svg>
                 Tampilan
