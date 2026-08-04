@@ -13,6 +13,26 @@ use Illuminate\View\View;
 
 class UserController extends Controller
 {
+    /**
+     * A user may only assign roles at a strictly lower tier than their own
+     * (superuser > owner > admin > kasir/produksi/gudang). Superuser is exempt.
+     */
+    private function assertCanAssignRoles(User $authUser, $selectedRoles): ?RedirectResponse
+    {
+        if ($authUser->isSuperadmin()) {
+            return null;
+        }
+
+        $tiers = ['superadmin' => 100, 'owner' => 90, 'admin' => 50];
+        $assignedTier = $selectedRoles->reduce(fn ($max, $role) => max($max, $tiers[$role->name] ?? 10), 10);
+
+        if ($assignedTier >= $authUser->roleTier()) {
+            return back()->withErrors(['roles' => 'Anda tidak dapat memberikan role yang setingkat atau lebih tinggi dari role Anda sendiri.'])->withInput();
+        }
+
+        return null;
+    }
+
     public function index(Request $request): View
     {
         $authUser = $request->user();
@@ -21,7 +41,7 @@ class UserController extends Controller
         if ($authUser->hasPermission('roles.view')) $allowedTabs[] = 'roles';
         $tab = in_array($request->query('tab', 'users'), $allowedTabs) ? $request->query('tab', 'users') : $allowedTabs[0];
 
-        $query = User::with('roles', 'branch');
+        $query = User::with('roles', 'branch')->where('role', '!=', 'superadmin');
 
         if ($search = $request->search) {
             $query->where(function ($q) use ($search) {
@@ -54,10 +74,9 @@ class UserController extends Controller
 
         $authUser = $request->user();
         $selectedRoles = Role::whereIn('id', $validated['roles'])->get();
-        $hasSuperadminRole = $selectedRoles->contains('name', 'superadmin');
 
-        if ($hasSuperadminRole && ! $authUser->isSuperadmin()) {
-            return back()->withErrors(['roles' => 'Hanya superadmin yang dapat membuat akun superadmin.'])->withInput();
+        if ($error = $this->assertCanAssignRoles($authUser, $selectedRoles)) {
+            return $error;
         }
 
         $firstRole = $selectedRoles->first();
@@ -89,11 +108,15 @@ class UserController extends Controller
         ]);
 
         $authUser = $request->user();
-        $selectedRoles = Role::whereIn('id', $validated['roles'])->get();
-        $hasSuperadminRole = $selectedRoles->contains('name', 'superadmin');
 
-        if ($hasSuperadminRole && ! $authUser->isSuperadmin()) {
-            return back()->withErrors(['roles' => 'Hanya superadmin yang dapat memberikan role superadmin.'])->withInput();
+        if (! $authUser->isSuperadmin() && $user->roleTier() >= $authUser->roleTier()) {
+            return back()->withErrors('Anda tidak dapat mengubah pengguna yang setingkat atau lebih tinggi dari Anda.');
+        }
+
+        $selectedRoles = Role::whereIn('id', $validated['roles'])->get();
+
+        if ($error = $this->assertCanAssignRoles($authUser, $selectedRoles)) {
+            return $error;
         }
 
         $firstRole = $selectedRoles->first();
@@ -120,6 +143,11 @@ class UserController extends Controller
     {
         if ($user->id === auth()->id()) {
             return back()->withErrors('Anda tidak dapat menghapus akun sendiri.');
+        }
+
+        $authUser = auth()->user();
+        if (! $authUser->isSuperadmin() && $user->roleTier() >= $authUser->roleTier()) {
+            return back()->withErrors('Anda tidak dapat menghapus pengguna yang setingkat atau lebih tinggi dari Anda.');
         }
 
         $superadminCount = User::where('role', 'superadmin')->count();

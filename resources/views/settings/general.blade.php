@@ -776,7 +776,7 @@
                     </div>
                     <div>
                         <h3 class="text-base font-semibold text-warm-900">Autentikasi Dua Langkah (2FA)</h3>
-                        <p class="text-xs text-warm-400">Tingkatkan keamanan akun superadmin dengan Google Authenticator.</p>
+                        <p class="text-xs text-warm-400">Tingkatkan keamanan akun superuser dengan Google Authenticator.</p>
                     </div>
                 </div>
 
@@ -823,7 +823,7 @@
                     <div class="space-y-5">
                         <div class="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm text-emerald-800 flex items-center gap-3">
                             <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            <span class="font-medium">2FA sudah aktif. Setiap login sebagai superadmin akan memerlukan kode Authenticator.</span>
+                            <span class="font-medium">2FA sudah aktif. Setiap login sebagai superuser akan memerlukan kode Authenticator.</span>
                         </div>
 
                         <div>

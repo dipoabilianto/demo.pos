@@ -24,9 +24,29 @@ trait HasPermissions
         return $this->hasPermission('attendances.check-in');
     }
 
+    /**
+     * superuser > owner > admin > kasir/produksi/gudang (all tied at the bottom tier).
+     */
+    public function roleTier(): int
+    {
+        $tiers = [
+            'superadmin' => 100,
+            'owner' => 90,
+            'admin' => 50,
+        ];
+
+        $tier = $tiers[$this->role] ?? 10;
+
+        foreach ($this->roles as $role) {
+            $tier = max($tier, $tiers[$role->name] ?? 10);
+        }
+
+        return $tier;
+    }
+
     public function getEffectivePermissions(): array
     {
-        if ($this->isSuperadmin()) {
+        if ($this->isSuperadmin() || $this->isOwner()) {
             $all = [];
             foreach (config('permissions.modules') as $module) {
                 foreach ($module['permissions'] as $perm) {
@@ -49,7 +69,7 @@ trait HasPermissions
 
     public function hasPermission(string $permission): bool
     {
-        if ($this->isSuperadmin()) {
+        if ($this->isSuperadmin() || $this->isOwner()) {
             return true;
         }
 
