@@ -1,5 +1,16 @@
 @php use App\Services\SettingService; $storeSettings = app(SettingService::class)->getSettings(); @endphp
 
+<div x-show="sidebarOpen && isMobile"
+     @click="sidebarOpen = false"
+     class="fixed inset-0 z-40 bg-black/50 lg:hidden"
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-300"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0">
+</div>
+
 <nav x-cloak x-show="sidebarOpen"
      x-transition:enter="transition-transform duration-300 ease-out"
      x-transition:enter-start="-translate-x-full"
@@ -12,17 +23,6 @@
             w-72"
      @click="isMobile && $event.target.closest('a[href]') && (sidebarOpen = false)"
      style="background: linear-gradient(to bottom, var(--theme-sidebar), color-mix(in srgb, var(--theme-sidebar) 70%, #020617));">
-
-    <div x-show="sidebarOpen && isMobile"
-         @click="sidebarOpen = false"
-         class="fixed inset-0 z-40 bg-black/50 lg:hidden"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-300"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0">
-    </div>
 
     <div class="group flex h-16 shrink-0 items-center px-6 gap-x-3 border-b border-white/5 transition-colors duration-300 hover:bg-white/[0.03]">
         <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-theme-gradient shadow-theme-shadow overflow-hidden transition-all duration-500 group-hover:shadow-lg group-hover:scale-105 group-hover:rotate-2">
