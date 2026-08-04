@@ -119,10 +119,17 @@ class OrderController extends Controller
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
+            'order_id' => 'nullable|integer|exists:orders,id',
         ]);
 
         try {
             DB::beginTransaction();
+
+            $draftOrder = null;
+            if ($validated['order_id'] ?? null) {
+                $draftOrder = Order::findOrFail($validated['order_id']);
+                $this->orderService->validateOrderAccess($draftOrder);
+            }
 
             $productIds = collect($validated['items'])->pluck('product_id');
             $lockedProducts = Product::whereIn('id', $productIds)->lockForUpdate()->get()->keyBy('id');
@@ -169,6 +176,11 @@ class OrderController extends Controller
             ]);
 
             $this->createOrderItems($order, $orderItems);
+
+            if ($draftOrder && $draftOrder->id !== $order->id) {
+                $draftOrder->items()->delete();
+                $draftOrder->delete();
+            }
 
             DB::commit();
 

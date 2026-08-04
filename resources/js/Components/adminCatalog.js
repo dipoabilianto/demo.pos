@@ -265,6 +265,7 @@ window.editOrder = async function (orderId) {
         items.forEach(i => { cart[i.product_id] = i.quantity; });
         saveCart(cart);
         editingOrderId = orderId;
+        setCookie('cart_order_id', orderId);
         updateEditModeUI();
         closeCartMobile();
         Alpine.store('toastManager').info('Pesanan dimuat ke keranjang. Silakan edit item.');
@@ -306,6 +307,7 @@ async function saveOrder() {
         if (data.success) {
             saveCart({});
             editingOrderId = null;
+            setCookie('cart_order_id', '', -1);
             updateEditModeUI();
             fetchSavedOrders();
             const msg = data.is_update ? 'Pesanan ' + data.order_number + ' diperbarui!' : 'Pesanan ' + data.order_number + ' disimpan!';
@@ -328,6 +330,11 @@ function initAddToCart() {
         const next = current + delta;
         if (next <= 0) { delete cart[id]; } else { cart[id] = next; }
         saveCart(cart);
+        if (Object.keys(cart).length === 0 && editingOrderId) {
+            editingOrderId = null;
+            setCookie('cart_order_id', '', -1);
+            updateEditModeUI();
+        }
     };
 
     window.addToCart = function (productId, qty = 1) {

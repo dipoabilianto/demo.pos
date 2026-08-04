@@ -390,6 +390,8 @@
             const body = { customer_name, customer_phone, notes, items };
             if (!isPublic) {
                 body.discount = parseInt(discountInput?.value) || 0;
+                const editingOrderId = getCookie('cart_order_id');
+                if (editingOrderId) body.order_id = parseInt(editingOrderId);
             } else {
                 const vc = (voucherInput?.value || '').trim();
                 if (vc) body.voucher_code = vc;
@@ -402,6 +404,7 @@
             const result = await resp.json();
             if (!resp.ok) throw new Error(result.error || 'Terjadi kesalahan.');
             setCookie('cart', '{}', -1);
+            setCookie('cart_order_id', '', -1);
             window.location.href = result.redirect || (isPublic ? '{{ route('orders.public-catalog.default') }}' : '{{ route('orders.catalog') }}');
         } catch (err) { alert(err.message || 'Gagal membuat pesanan.'); submitBtn.disabled = false; btnLabel.classList.remove('hidden'); btnSpinner.classList.add('hidden'); }
     });
