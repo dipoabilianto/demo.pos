@@ -171,7 +171,7 @@ function setPreset(val) {
 </div>
 
 <div class="animate-fade-in-up rounded-2xl bg-white shadow-md shadow-warm-900/5 border border-warm-200/50 overflow-hidden" style="animation-delay: 0.35s">
-    <div class="flex items-center justify-between p-6 pb-4">
+    <div class="flex flex-wrap items-center justify-between gap-3 p-6 pb-4">
         <h3 class="text-base font-semibold text-warm-900 flex items-center gap-2">
             <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V6.75a60.007 60.007 0 00-15.797-2.101M4.5 18.75V6.75m0 0h15M6 12.75h3m-3 3.75h3m-6-3.75h.008M6 6.75h.008" /></svg>
             Penjualan Terbaru

@@ -3,7 +3,7 @@
 @section('subtitle', 'Kelola cabang, tipe bisnis, dan kategorinya')
 @section('content')
 <div x-data="{ activeTab: 'cabang' }" class="space-y-6">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex gap-1 rounded-xl bg-warm-100 p-1">
             <button @click="activeTab = 'cabang'" :class="activeTab === 'cabang' ? 'bg-white shadow-sm ring-1 ring-warm-200' : 'hover:bg-white/50'" class="rounded-lg px-4 py-2 text-sm font-medium text-warm-700 transition-all">
                 Cabang

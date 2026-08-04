@@ -1,5 +1,5 @@
 <div class="max-w-7xl mx-auto p-6" x-data="{ addModal: false, addShiftId: null, addDay: null }">
-    <div class="flex items-center justify-between pb-4 border-b border-warm-100 mb-6">
+    <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-warm-100 mb-6">
         <div class="flex items-center gap-3">
             <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-theme-primary/10 text-theme-primary">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
