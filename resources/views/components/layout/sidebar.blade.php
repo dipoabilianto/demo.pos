@@ -1,9 +1,8 @@
 @php use App\Services\SettingService; $storeSettings = app(SettingService::class)->getSettings(); @endphp
 
-<nav class="flex flex-col shrink-0 overflow-x-hidden
+<nav x-cloak class="flex flex-col shrink-0 overflow-x-hidden
             fixed inset-y-0 left-0 z-50 lg:relative lg:z-0
             max-lg:w-72 lg:w-72
-            max-lg:-translate-x-full
             max-lg:transition-transform max-lg:duration-300"
      :class="sidebarOpen
                 ? 'translate-x-0'
